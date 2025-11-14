@@ -222,7 +222,8 @@
         }
 
         #recordsTable button:nth-child(1) { background: #ffc107; }
-        #recordsTable button:nth-child(2) { background: #dc3545; color: #fff; }
+        #recordsTable button:nth-child(2) { background: #17a2b8; color: #fff; }
+        #recordsTable button:nth-child(3) { background: #dc3545; color: #fff; }
 
         #recordsTable {
             width: 100%;
@@ -639,6 +640,9 @@
                     document.getElementById('interest').max = permit.interest || 0;
                     document.getElementById('surcharge').max = permit.surcharge || 0;
                     
+                    // Auto-populate year from permit application
+                    document.getElementById('year').value = permit.year || '';
+                    
                     // Update remaining for each field
                     updateRemaining('amount');
                     updateRemaining('discount');
@@ -655,6 +659,7 @@
                 document.getElementById('discount').max = '';
                 document.getElementById('interest').max = '';
                 document.getElementById('surcharge').max = '';
+                document.getElementById('year').value = '';
             }
         });
 
@@ -890,6 +895,7 @@
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0">${rec.application_or_no || ''}</td>
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0">
                         <button onclick="editRecord(${idx})">Edit</button>
+                        <button onclick="duplicateRecord(${idx})">Dup</button>
                         <button onclick="deleteRecord(${idx})">Del</button>
                     </td>
                 `;
@@ -1089,6 +1095,24 @@
             updateRecordCount();
         }
 
+        function duplicateRecord(idx) {
+            const r = records[idx];
+            if (!r) return;
+            const copy = JSON.parse(JSON.stringify(r));
+            records.splice(idx + 1, 0, copy);
+            saveRecords();
+            renderTable();
+            updateRecordCount();
+        }
+
+        // Format date from YYYY-MM-DD to mm/dd/yyyy with apostrophe for months starting with 0
+        function formatDateForCSV(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-');
+            const formatted = `${month}/${day}/${year}`;
+            return month.startsWith('0') ? `'${formatted}` : formatted;
+        }
+
         function generateCSV() {
             if (records.length === 0) {
                 alert('⚠️ No records to generate! Please add at least one fee record.');
@@ -1104,7 +1128,11 @@
 
             records.forEach(record => {
                 const row = headers.map(header => {
-                    const value = record[header] || '';
+                    let value = record[header] || '';
+                    // Format date fields to mm/dd/yyyy with apostrophe for leading zeros
+                    if (value && (header.includes('date') || header === 'dob')) {
+                        value = formatDateForCSV(value);
+                    }
                     if (String(value).includes(',') || String(value).includes('"') || String(value).includes('\n')) {
                         return `"${String(value).replace(/"/g, '""')}"`;
                     }
