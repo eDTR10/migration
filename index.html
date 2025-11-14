@@ -146,6 +146,27 @@
             margin-top: 8px;
         }
 
+        .nav-link {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .nav-link.active {
+            background: rgba(255,255,255,0.4);
+            font-weight: 600;
+        }
+
         .radio-group label,
         .checkbox-group label {
             display: flex;
@@ -264,21 +285,19 @@
                 <p style="opacity:0.95;font-size:13px;margin-top:2px;">Fill out the form below to generate your CSV file</p>
             </div>
 
-            <div style="display:flex;gap:10px;align-items:center;">
-                <div style="display:flex;flex-direction:column;align-items:flex-end;">
-                    <label style="font-size:12px;opacity:0.9;margin-bottom:6px">Default BIN Prefix (first 7 digits)</label>
+            <div class="header-links">
+                <a href="https://edtr10.github.io/migration/" class="nav-link active">← Step 1: Registration</a>
+                <a href="business-activity.html" class="nav-link">Step 2: Activity</a>
+                <a href="permit-application.html" class="nav-link">Step 3: Permit</a>
+                <a href="business-fees.html" class="nav-link">Step 4: Fees →</a>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;border-left:1px solid rgba(255,255,255,0.2);padding-left:10px;margin-left:10px;">
+                    <label style="font-size:12px;opacity:0.9;margin-bottom:6px">Default BIN Prefix</label>
                     <div style="display:flex;gap:8px;align-items:center;">
-                        <input id="defaultBinPrefix" type="text" placeholder="e.g. 1001301" maxlength="7" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);width:120px;background:rgba(255,255,255,0.06);color:#fff">
-                        <button id="clearDefaultPrefix" style="padding:8px 10px;border-radius:6px;border:none;background:rgba(255,255,255,0.15);color:#fff;cursor:pointer">Clear</button>
+                        <input id="defaultBinPrefix" type="text" placeholder="e.g. 1001301" maxlength="7" style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.25);width:100px;background:rgba(255,255,255,0.06);color:#fff">
+                        <button id="clearDefaultPrefix" style="padding:8px 10px;border-radius:6px;border:none;background:rgba(255,255,255,0.15);color:#fff;cursor:pointer;font-size:11px">Clear</button>
                     </div>
                 </div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <a href="business-activity.html" style="background:rgba(255,255,255,0.2);color:white;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:14px;cursor:pointer;border:none;transition:all 0.3s;display:inline-block" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Step 2: Activity</a>
-                    <a href="permit-application.html" style="background:rgba(255,255,255,0.2);color:white;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:14px;cursor:pointer;border:none;transition:all 0.3s;display:inline-block" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">Step 3: Permit →</a>
-                </div>
-                <div style="text-align:right">
-                    <div class="records-count" id="recordCount">Records: 0</div>
-                </div>
+                <div class="records-count" id="recordCount">Records: 0</div>
             </div>
         </div>
 
