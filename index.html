@@ -1212,6 +1212,14 @@
             records.splice(idx,1); saveRecords(); renderTable(); updateRecordCount();
         }
 
+        // Format date from YYYY-MM-DD to mm/dd/yyyy with apostrophe for months starting with 0
+        function formatDateForCSV(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-');
+            const formatted = `${month}/${day}/${year}`;
+            return month.startsWith('0') ? `'${formatted}` : formatted;
+        }
+
         // Generate CSV uses current records (saved)
         function generateCSV() {
             if (records.length === 0) {
@@ -1234,10 +1242,14 @@
 
             records.forEach(record => {
                 const row = headers.map(header => {
-                    const value = record[header] || '';
+                    let value = record[header] || '';
+                    // Format date fields to mm/dd/yyyy with apostrophe for leading zeros
+                    if (value && (header.includes('date') || header === 'dob')) {
+                        value = formatDateForCSV(value);
+                    }
                     // Escape commas and quotes
-                    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-                        return `"${value.replace(/"/g, '""')}"`;
+                    if (String(value).includes(',') || String(value).includes('"') || String(value).includes('\n')) {
+                        return `"${String(value).replace(/"/g, '""')}"`;
                     }
                     return value;
                 });
