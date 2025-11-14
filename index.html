@@ -1212,12 +1212,13 @@
             records.splice(idx,1); saveRecords(); renderTable(); updateRecordCount();
         }
 
-        // Format date from YYYY-MM-DD to mm/dd/yyyy with apostrophe for months starting with 0
+        // Format date from YYYY-MM-DD to mm/dd/yyyy with apostrophe prefix to force text format
         function formatDateForCSV(dateStr) {
             if (!dateStr) return '';
             const [year, month, day] = dateStr.split('-');
             const formatted = `${month}/${day}/${year}`;
-            return month.startsWith('0') ? `'${formatted}` : formatted;
+            // Always add apostrophe to force Excel to treat as text
+            return `'${formatted}`;
         }
 
         // Generate CSV uses current records (saved)
