@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Activity CSV Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #0586e8 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        html, body { height: 100%; }
+        .container {
+            width: calc(100% - 200px);
+            max-width: none;
+            height: calc(100vh - 80px);
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: grid;
+            grid-template-columns: 1fr 50%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #18b2ef 0%, #0d5a8f 100%);
+            color: white;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            grid-column: 1 / -1;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 0;
+        }
+
+        .header p {
+            opacity: 0.95;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .form-container {
+            padding: 24px 30px;
+            overflow-y: auto;
+            height: calc(100vh - 140px);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #18b2ef;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #18b2ef;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        label .required {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #18b2ef;
+            box-shadow: 0 0 0 3px rgba(24, 178, 239, 0.1);
+        }
+
+        input.error, select.error {
+            border-color: #e74c3c;
+        }
+
+        input.success, select.success {
+            border-color: #2ecc71;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .field-hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding: 14px 22px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #18b2ef 0%, #0d5a8f 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(24, 178, 239, 0.4);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+        }
+
+        .records-count {
+            background: #18b2ef;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .records-panel {
+            background: #fafafa;
+            overflow: auto;
+            height: 100%;
+            padding: 20px 30px;
+            border-top: 1px solid #eee;
+        }
+
+        #recordsTable button {
+            margin-right: 6px;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 0;
+            cursor: pointer;
+        }
+
+        #recordsTable button:nth-child(1) { background: #ffc107; }
+        #recordsTable button:nth-child(2) { background: #17a2b8; color: #fff; }
+        #recordsTable button:nth-child(3) { background: #dc3545; color: #fff; }
+
+        #recordsTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #recordsTable th, #recordsTable td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        #recordsTable thead {
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        input:disabled, select:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-link {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .nav-link.active {
+            background: rgba(255,255,255,0.4);
+            font-weight: 600;
+        }
+
+        @media (max-width: 1100px) {
+            .container { grid-template-columns: 1fr; }
+            .records-panel { order: 2; }
+            .form-container { height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <h1>🏪 Business Activity <b>(Step 2)</b> </h1>
+                <p>Manage business lines and activities for registered businesses</p>
+            </div>
+
+            <div class="header-links">
+                <a href="migration-busines.html" class="nav-link">← Business Registration</a>
+                <a href="permit-application.html" class="nav-link">Permit Application →</a>
+                <div class="records-count" id="recordCount">Records: 0</div>
+            </div>
+        </div>
+
+        <form id="activityForm">
+            <div class="form-container">
+                <!-- BUSINESS ACTIVITY INFORMATION -->
+                <div class="section-title">📊 Business Activity Information</div>
+
+                <div class="form-group">
+                    <label>BIN (Business Identification Number) <span class="required">*</span></label>
+                    <select id="bin" style="cursor: pointer;">
+                        <option value="">-- Select a Business --</option>
+                    </select>
+                    <div class="field-hint">Populated from registered businesses</div>
+                    <div class="error-message" id="bin-error"></div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Business Line Code <span class="required">*</span></label>
+                        <input type="text" id="business_line_code" placeholder="e.g. 47219" maxlength="20">
+                        <div class="field-hint">Must exist in business line system</div>
+                        <div class="error-message" id="business_line_code-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Capital Amount</label>
+                        <input type="number" id="capital_amount" placeholder="e.g. 300000" min="0" value="0">
+                        <div class="field-hint">Input 0 if not applicable</div>
+                        <div class="error-message" id="capital_amount-error"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Gross Amount Essential</label>
+                        <input type="number" id="gross_amount_essential" placeholder="e.g. 50000" min="0" oninput="calculateGrossAmount()">
+                        <div class="field-hint">Leave blank if not applicable</div>
+                        <div class="error-message" id="gross_amount_essential-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gross Amount Non-Essential</label>
+                        <input type="number" id="gross_amount_nonessential" placeholder="e.g. 50000" min="0" oninput="calculateGrossAmount()">
+                        <div class="field-hint">Leave blank if not applicable</div>
+                        <div class="error-message" id="gross_amount_nonessential-error"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Gross Amount (Auto-calculated)</label>
+                    <input type="number" id="gross_amount" disabled placeholder="0" value="0" style="background-color: #f0f0f0; cursor: not-allowed;">
+                    <div class="field-hint">Automatically calculated as Essential + Non-Essential</div>
+                    <div class="error-message" id="gross_amount-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Retired Date</label>
+                    <input type="date" id="retired_date">
+                    <div class="field-hint">Leave blank if business is active (MM/DD/YYYY format)</div>
+                    <div class="error-message" id="retired_date-error"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Activity</button>
+                <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
+                <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
+            </div>
+        </form>
+
+        <div class="records-panel">
+            <div class="section-title">💾 Saved Activities</div>
+            <div style="padding:10px 0 20px 0;">
+                <input type="text" id="searchRecords" placeholder="Search by BIN or line code..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #ddd;">
+                <table id="recordsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>BIN</th>
+                            <th>Line Code</th>
+                            <th>Capital</th>
+                            <th>Gross Amt</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'business_activity_records_v1';
+        const BUSINESS_STORAGE_KEY = 'business_records_v1';
+
+        let records = loadRecords();
+        let businessRecords = [];
+        let editingIndex = null;
+
+        // Load records on page init
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBusinessRecords();
+            populateBinDropdown();
+            renderTable();
+            updateRecordCount();
+        });
+
+        function loadRecords() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error('Failed to load activity records', e);
+                return [];
+            }
+        }
+
+        function saveRecords() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            } catch (e) {
+                console.error('Failed to save activity records', e);
+            }
+        }
+
+        function loadBusinessRecords() {
+            try {
+                const raw = localStorage.getItem(BUSINESS_STORAGE_KEY);
+                businessRecords = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error('Failed to load business records', e);
+                businessRecords = [];
+            }
+        }
+
+        function populateBinDropdown() {
+            const select = document.getElementById('bin');
+            // Keep first option
+            const firstOption = select.options[0];
+            select.innerHTML = '';
+            select.appendChild(firstOption);
+
+            // Add business records as options
+            businessRecords.forEach(rec => {
+                const opt = document.createElement('option');
+                opt.value = rec.bin || '';
+                opt.textContent = `${rec.bin} - ${rec.business_name || ''}`;
+                select.appendChild(opt);
+            });
+
+            // If already selected during edit, keep it
+            if (editingIndex !== null && records[editingIndex]) {
+                select.value = records[editingIndex].bin || '';
+            }
+        }
+
+        function calculateGrossAmount() {
+            const essential = parseFloat(document.getElementById('gross_amount_essential').value) || 0;
+            const nonessential = parseFloat(document.getElementById('gross_amount_nonessential').value) || 0;
+            const total = essential + nonessential;
+            document.getElementById('gross_amount').value = total;
+        }
+
+        function validateField(fieldId, value) {
+            if (fieldId === 'bin') {
+                if (!value) {
+                    showError(fieldId, 'BIN is required');
+                    return false;
+                }
+                clearError(fieldId);
+                return true;
+            }
+
+            if (fieldId === 'business_line_code') {
+                if (!value || value.trim() === '') {
+                    showError(fieldId, 'Business line code is required');
+                    return false;
+                }
+                clearError(fieldId);
+                return true;
+            }
+
+            return true;
+        }
+
+        function showError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + '-error');
+            if (field) {
+                field.classList.add('error');
+                field.classList.remove('success');
+            }
+            if (error) {
+                error.textContent = message;
+                error.classList.add('show');
+            }
+        }
+
+        function clearError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const error = document.getElementById(fieldId + '-error');
+            if (field) {
+                field.classList.remove('error');
+                field.classList.add('success');
+            }
+            if (error) {
+                error.classList.remove('show');
+            }
+        }
+
+        function renderTable(filter = '') {
+            const tbody = document.querySelector('#recordsTable tbody');
+            tbody.innerHTML = '';
+
+            records.forEach((rec, idx) => {
+                if (filter) {
+                    const q = filter.toLowerCase();
+                    if (!((rec.bin || '').toLowerCase().includes(q) || (rec.business_line_code || '').toLowerCase().includes(q))) return;
+                }
+
+                const status = rec.retired_date ? '🔴 Retired' : '🟢 Active';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:8px;border-bottom:1px solid #f0f0f0">${idx + 1}</td>
+                    <td style="padding:8px;border-bottom:1px solid #f0f0f0">${rec.bin || ''}</td>
+                    <td style="padding:8px;border-bottom:1px solid #f0f0f0">${rec.business_line_code || ''}</td>
+                    <td style="padding:8px;border-bottom:1px solid #f0f0f0">${rec.capital_amount || '0'}</td>
+                    <td style="padding:8px;border-bottom:1px solid #f0f0f0">${rec.gross_amount || '0'}</td>
+                    <td style="padding:8px;border-bottom:1px solid #f0f0f0">${status}</td>
+                    <td style="padding:8px;border-bottom:1px solid #f0f0f0">
+                        <button onclick="editRecord(${idx})">Edit</button>
+                        <button onclick="duplicateRecord(${idx})">Duplicate</button>
+                        <button onclick="deleteRecord(${idx})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('searchRecords').addEventListener('input', function () {
+            renderTable(this.value);
+        });
+
+        function addRecord() {
+            let isValid = true;
+            let errors = [];
+
+            const bin = document.getElementById('bin').value;
+            if (!validateField('bin', bin)) {
+                isValid = false;
+                if (!bin) errors.push('❌ BIN is required (select from dropdown)');
+                else errors.push('❌ BIN: invalid selection');
+            }
+
+            const lineCode = document.getElementById('business_line_code').value;
+            if (!validateField('business_line_code', lineCode)) {
+                isValid = false;
+                errors.push('❌ Business Line Code is required (e.g., 47219)');
+            }
+
+            if (!isValid) {
+                alert('⚠️ Please fix these errors:\n\n' + errors.join('\n'));
+                return;
+            }
+
+            const record = {
+                bin: bin,
+                business_line_code: lineCode,
+                capital_amount: document.getElementById('capital_amount').value || '0',
+                gross_amount: document.getElementById('gross_amount').value || '0',
+                gross_amount_essential: document.getElementById('gross_amount_essential').value || '',
+                gross_amount_nonessential: document.getElementById('gross_amount_nonessential').value || '',
+                retired_date: document.getElementById('retired_date').value || ''
+            };
+
+            if (editingIndex !== null) {
+                records[editingIndex] = record;
+                editingIndex = null;
+                document.querySelector('.btn-primary').textContent = '➕ Add Activity';
+                alert('✅ Activity updated');
+            } else {
+                records.push(record);
+                alert(`✅ Activity added successfully! Total activities: ${records.length}`);
+            }
+
+            saveRecords();
+            renderTable();
+            updateRecordCount();
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('activityForm').reset();
+
+            // Reset select to first option
+            document.getElementById('bin').value = '';
+
+            // Clear all error/success states
+            document.querySelectorAll('.error, .success').forEach(el => {
+                el.classList.remove('error', 'success');
+            });
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.remove('show');
+            });
+
+            // Reset defaults
+            document.getElementById('capital_amount').value = '0';
+            document.getElementById('gross_amount_essential').value = '';
+            document.getElementById('gross_amount_nonessential').value = '';
+            document.getElementById('gross_amount').value = '0';
+
+            editingIndex = null;
+            document.querySelector('.btn-primary').textContent = '➕ Add Activity';
+        }
+
+        function updateRecordCount() {
+            document.getElementById('recordCount').textContent = `Records: ${records.length}`;
+        }
+
+        function editRecord(idx) {
+            const r = records[idx];
+            if (!r) return;
+
+            editingIndex = idx;
+
+            // Populate form
+            document.getElementById('bin').value = r.bin || '';
+            document.getElementById('business_line_code').value = r.business_line_code || '';
+            document.getElementById('capital_amount').value = r.capital_amount || '0';
+            document.getElementById('gross_amount_essential').value = r.gross_amount_essential || '';
+            document.getElementById('gross_amount_nonessential').value = r.gross_amount_nonessential || '';
+            document.getElementById('retired_date').value = r.retired_date || '';
+
+            // Recalculate gross amount after populating essential and non-essential
+            calculateGrossAmount();
+
+            document.querySelector('.btn-primary').textContent = '💾 Save Changes';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function duplicateRecord(idx) {
+            const r = records[idx];
+            if (!r) return;
+            const copy = JSON.parse(JSON.stringify(r));
+            records.splice(idx + 1, 0, copy);
+            saveRecords();
+            renderTable();
+            updateRecordCount();
+        }
+
+        function deleteRecord(idx) {
+            if (!confirm('Delete this activity record?')) return;
+            records.splice(idx, 1);
+            saveRecords();
+            renderTable();
+            updateRecordCount();
+        }
+
+        function generateCSV() {
+            if (records.length === 0) {
+                alert('⚠️ No records to generate! Please add at least one activity.');
+                return;
+            }
+
+            const headers = [
+                'bin', 'business_line_code', 'capital_amount', 'gross_amount',
+                'gross_amount_essential', 'gross_amount_nonessential', 'retired_date'
+            ];
+
+            let csv = headers.join(',') + '\n';
+
+            records.forEach(record => {
+                const row = headers.map(header => {
+                    let value = record[header] || '';
+                    
+                    // Format retired_date to MM/DD/YYYY
+                    if (header === 'retired_date' && value) {
+                        value = formatDate(value);
+                    }
+
+                    // Escape commas and quotes
+                    if (String(value).includes(',') || String(value).includes('"') || String(value).includes('\n')) {
+                        return `"${String(value).replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                });
+                csv += row.join(',') + '\n';
+            });
+
+            // Create download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `business_activity_${timestamp}.csv`;
+
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+
+            alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
+
+            if (confirm('Do you want to clear all records and start fresh?')) {
+                records = [];
+                saveRecords();
+                renderTable();
+                updateRecordCount();
+            }
+        }
+    </script>
+</body>
+</html>
