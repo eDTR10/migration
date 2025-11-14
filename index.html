@@ -198,6 +198,47 @@
         #recordsTable button:nth-child(2){ background:#17a2b8; color:#fff }
         #recordsTable button:nth-child(3){ background:#dc3545; color:#fff }
 
+        #recordsTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #recordsTable th, #recordsTable td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        #recordsTable thead {
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        #recordsTable th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        #recordsTable th:hover {
+            background: #e8e8e8;
+        }
+
+        #recordsTable tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        #recordsTable tbody tr:hover {
+            background-color: #f9f3e6;
+        }
+
+        .sort-indicator {
+            margin-left: 5px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
         button {
             flex: 1;
             padding: 15px;
@@ -245,6 +286,13 @@
             display: inline-block;
             margin: 10px 0;
             font-weight: 600;
+        }
+
+        .table-scroll-container {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
         }
 
         .hidden {
@@ -583,19 +631,21 @@
             <div class="section-title">💾 Saved Records</div>
             <div style="padding:10px 0 20px 0;">
                 <input type="text" id="searchRecords" placeholder="Search by business name or BIN..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #ddd;">
-                <table id="recordsTable" style="width:100%;border-collapse:collapse;">
-                    <thead>
-                        <tr style="text-align:left;border-bottom:1px solid #e6e6e6;padding-bottom:8px;">
-                            <th style="padding:8px">#</th>
-                            <th style="padding:8px">BIN</th>
-                            <th style="padding:8px">Business Name</th>
-                            <th style="padding:8px">Type</th>
-                            <th style="padding:8px">In-Charge</th>
-                            <th style="padding:8px">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+                <div class="table-scroll-container">
+                    <table id="recordsTable" style="width:100%;border-collapse:collapse;">
+                        <thead>
+                            <tr style="text-align:left;border-bottom:1px solid #e6e6e6;padding-bottom:8px;">
+                                <th style="padding:8px" onclick="sortTable(0)"># <span class="sort-indicator" id="sort-0"></span></th>
+                                <th style="padding:8px" onclick="sortTable(1)">BIN <span class="sort-indicator" id="sort-1"></span></th>
+                                <th style="padding:8px" onclick="sortTable(2)">Business Name <span class="sort-indicator" id="sort-2"></span></th>
+                                <th style="padding:8px" onclick="sortTable(3)">Type <span class="sort-indicator" id="sort-3"></span></th>
+                                <th style="padding:8px" onclick="sortTable(4)">In-Charge <span class="sort-indicator" id="sort-4"></span></th>
+                                <th style="padding:8px">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -608,6 +658,8 @@
     let records = loadRecords();
     let editingIndex = null; // when editing a record
     let defaultBinPrefix = '';
+    let sortColumn = null;
+    let sortAscending = true;
 
         // Real-time validation patterns
         const patterns = {
@@ -852,6 +904,49 @@
             if(field) field.classList.remove('error');
             if(field) field.classList.add('success');
             if(error) error.classList.remove('show');
+        }
+
+        // Sort table
+        function sortTable(colIndex) {
+            const sortFields = ['#', 'bin', 'business_name', 'business_type', 'incharge_first_name'];
+            const fieldName = sortFields[colIndex];
+            
+            if (sortColumn === colIndex) {
+                sortAscending = !sortAscending;
+            } else {
+                sortColumn = colIndex;
+                sortAscending = true;
+            }
+
+            // Clear all sort indicators
+            for (let i = 0; i < 5; i++) {
+                document.getElementById(`sort-${i}`).textContent = '';
+            }
+
+            // Set sort indicator
+            const indicator = sortAscending ? '▲' : '▼';
+            document.getElementById(`sort-${colIndex}`).textContent = indicator;
+
+            records.sort((a, b) => {
+                let aVal = a[fieldName] || '';
+                let bVal = b[fieldName] || '';
+                
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                } else {
+                    aVal = parseFloat(aVal);
+                    bVal = parseFloat(bVal);
+                }
+                
+                if (sortAscending) {
+                    return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                } else {
+                    return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+                }
+            });
+
+            renderTable(document.getElementById('searchRecords').value);
         }
 
         // Render table (show BIN column)
