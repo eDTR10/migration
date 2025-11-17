@@ -196,7 +196,7 @@
         }
 
         .table-scroll-container {
-            max-height: calc(100vh - 250px);
+            flex: 1;
             overflow-y: auto;
             border: 1px solid #e0e0e0;
             border-radius: 6px;
@@ -214,10 +214,10 @@
 
         .records-panel {
             background: #fafafa;
-            overflow: auto;
-            height: 100%;
-            padding: 20px 30px;
-            border-top: 1px solid #eee;
+            overflow: hidden;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
         }
 
         #recordsTable button {
@@ -349,6 +349,7 @@
                 <a href="business-activity.html" class="nav-link">Step 2: Activity</a>
                 <a href="permit-application.html" class="nav-link active">Step 3: Permit</a>
                 <a href="business-fees.html" class="nav-link">Step 4: Fees →</a>
+                <button onclick="clearAllRecords()" style="padding:6px 12px;background:rgba(220,53,69,0.8);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;transition:all 0.3s;" onmouseover="this.style.background='rgba(220,53,69,1)'" onmouseout="this.style.background='rgba(220,53,69,0.8)'">🗑️ Clear All</button>
                 <div class="records-count" style=" background-color:#5c787c ;" id="recordCount">Records: 0</div>
             </div>
         </div>
@@ -546,25 +547,25 @@
         </form>
 
         <div class="records-panel">
-            <div class="section-title">💾 Saved Records</div>
-            <div style="padding:10px 0 20px 0;">
+            <div style="padding:20px 30px 0 30px;">
+                <div class="section-title">💾 Saved Records</div>
                 <input type="text" id="searchRecords" placeholder="Search by BIN or OR#..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #ddd;">
-                <div class="table-scroll-container">
-                    <table id="recordsTable">
-                        <thead>
-                            <tr>
-                                <th onclick="sortPermitTable(0)"># <span class="sort-indicator" id="sort-0"></span></th>
-                                <th onclick="sortPermitTable(1)">BIN <span class="sort-indicator" id="sort-1"></span></th>
-                                <th onclick="sortPermitTable(2)">App Type <span class="sort-indicator" id="sort-2"></span></th>
-                                <th onclick="sortPermitTable(3)">Total <span class="sort-indicator" id="sort-3"></span></th>
-                                <th onclick="sortPermitTable(4)">OR# <span class="sort-indicator" id="sort-4"></span></th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            </div>
+            <div class="table-scroll-container" style="margin: 0 30px 30px 30px;">
+                <table id="recordsTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortPermitTable(0)"># <span class="sort-indicator" id="sort-0"></span></th>
+                            <th onclick="sortPermitTable(1)">BIN <span class="sort-indicator" id="sort-1"></span></th>
+                            <th onclick="sortPermitTable(2)">App Type <span class="sort-indicator" id="sort-2"></span></th>
+                            <th onclick="sortPermitTable(3)">Total <span class="sort-indicator" id="sort-3"></span></th>
+                            <th onclick="sortPermitTable(4)">OR# <span class="sort-indicator" id="sort-4"></span></th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -833,12 +834,13 @@
 
                 const tr = document.createElement('tr');
                 const status = rec.barangay_clearance_number ? '✓ ISSUED' : '○ PENDING';
+                const orNoDisplay = rec.or_no && rec.or_no.length > 6 ? rec.or_no.substring(0, 6) + '...' : (rec.or_no || '');
                 tr.innerHTML = `
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0">${idx + 1}</td>
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0;font-weight:600">${rec.business_bin || ''}</td>
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0">${rec.application_type || ''}</td>
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0">₱${parseFloat(rec.total || 0).toFixed(2)}</td>
-                    <td style="padding:6px;border-bottom:1px solid #f0f0f0">${rec.or_no || ''}</td>
+                    <td style="padding:6px;border-bottom:1px solid #f0f0f0" title="${rec.or_no || ''}">${orNoDisplay}</td>
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0">${status}</td>
                     <td style="padding:6px;border-bottom:1px solid #f0f0f0">
                         <button onclick="editRecord(${idx})">Edit</button>
@@ -848,6 +850,22 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // Clear all records with confirmation
+        function clearAllRecords() {
+            if (records.length === 0) {
+                alert('No records to clear');
+                return;
+            }
+            if (confirm(`⚠️ Are you sure you want to delete ALL ${records.length} records? This cannot be undone!`)) {
+                records = [];
+                usedOrNumbers.clear();
+                saveRecords();
+                renderTable();
+                updateRecordCount();
+                alert('✅ All records have been cleared');
+            }
         }
 
         document.getElementById('searchRecords').addEventListener('input', function() {
@@ -1072,13 +1090,12 @@
             updateRecordCount();
         }
 
-        // Format date from YYYY-MM-DD to mm/dd/yyyy with apostrophe prefix to force text format
+        // Format date from YYYY-MM-DD to mm/dd/yyyy format
         function formatDateForCSV(dateStr) {
             if (!dateStr) return '';
             const [year, month, day] = dateStr.split('-');
             const formatted = `${month}/${day}/${year}`;
-            // Always add apostrophe to force Excel to treat as text
-            return `'${formatted}`;
+            return formatted;
         }
 
         function generateCSV() {
@@ -1120,14 +1137,6 @@
             link.click();
 
             alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
-
-            if (confirm('Do you want to clear all records and start fresh?')) {
-                records = [];
-                usedOrNumbers.clear();
-                saveRecords();
-                renderTable();
-                updateRecordCount();
-            }
         }
     </script>
 </body>
