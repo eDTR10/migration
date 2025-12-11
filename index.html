@@ -440,13 +440,15 @@
                 <div class="row">
                     <div class="form-group">
                         <label>DTI Number <span id="dti-required"></span></label>
-                        <input type="text" id="dti_no" placeholder="DTI Registration Number" maxlength="30" disabled>
+                        <input type="text" id="dti_no" placeholder="2024-1234567" maxlength="30" disabled>
+                        <div class="field-hint">Format: YYYY-###### (e.g., 2024-1234567)</div>
                         <div class="error-message" id="dti_no-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>SEC Number <span id="sec-required"></span></label>
-                        <input type="text" id="sec_no" placeholder="SEC Registration Number" maxlength="30" disabled>
+                        <input type="text" id="sec_no" placeholder="CS2024-12345 or PN2024-12345" maxlength="30" disabled>
+                        <div class="field-hint">Format: XX####-##### (CS for Corporation, PN for Partnership)</div>
                         <div class="error-message" id="sec_no-error"></div>
                     </div>
                 </div>
@@ -454,7 +456,8 @@
                 <div class="row">
                     <div class="form-group">
                         <label>CDA Number <span id="cda-required"></span></label>
-                        <input type="text" id="cda_no" placeholder="CDA Registration Number" maxlength="30" disabled>
+                        <input type="text" id="cda_no" placeholder="9520-16012345" maxlength="30" disabled>
+                        <div class="field-hint">Format: ####-######## (e.g., 9520-16012345)</div>
                         <div class="error-message" id="cda_no-error"></div>
                     </div>
 
@@ -719,7 +722,10 @@
             bin: /^\d{7}-\d{4}-\d{7}$/,
             email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
             cellphone: /^639\d{9}$/,
-            tin: /^\d{3}-\d{3}-\d{3}-\d{3}$/
+            tin: /^\d{3}-\d{3}-\d{3}-\d{3}$/,
+            dti_no: /^[a-zA-Z0-9-]{3,30}$/,
+            sec_no: /^[a-zA-Z0-9-]{3,30}$/,
+            cda_no: /^[a-zA-Z0-9-]{3,30}$/
         };
 
         // Initialize UI
@@ -802,6 +808,53 @@
             if (e.target.value) validateField('tin_no', e.target.value);
         });
 
+        // DTI number formatting and validation
+        document.getElementById('dti_no').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d]/g, '');
+            // Format as YYYY-###### (e.g., 2024-1234567)
+            if (value.length > 4) {
+                value = value.slice(0, 4) + '-' + value.slice(4);
+            }
+            e.target.value = value.slice(0, 11);
+            if (e.target.value) validateField('dti_no', e.target.value);
+        });
+
+        // SEC number formatting and validation
+        document.getElementById('sec_no').addEventListener('input', function(e) {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            
+            // Get business type to determine correct prefix
+            const businessType = document.getElementById('business_type').value;
+            let expectedPrefix = 'CS'; // Default prefix
+            
+            if (businessType === 'PARTNERSHIP') {
+                expectedPrefix = 'PN';
+            }
+            
+            // If value doesn't start with either CS or PN, add the expected prefix
+            if (!value.startsWith('CS') && !value.startsWith('PN')) {
+                value = expectedPrefix + value;
+            }
+            
+            // Format as XX####-##### (e.g., CS2024-12345 or PN2024-12345)
+            if (value.length > 6) {
+                value = value.slice(0, 6) + '-' + value.slice(6);
+            }
+            e.target.value = value.slice(0, 12);
+            if (e.target.value) validateField('sec_no', e.target.value);
+        });
+
+        // CDA number formatting and validation
+        document.getElementById('cda_no').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d]/g, '');
+            // Format as ####-######## (e.g., 9520-16012345)
+            if (value.length > 4) {
+                value = value.slice(0, 4) + '-' + value.slice(4);
+            }
+            e.target.value = value.slice(0, 13);
+            if (e.target.value) validateField('cda_no', e.target.value);
+        });
+
         // Format cellphone input
         document.getElementById('cellphone_no').addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/[^\d]/g, '').slice(0, 12);
@@ -834,12 +887,23 @@
             // Enable based on type
             if (type === 'SOLE PROPRIETORSHIP') {
                 dti.disabled = false;
+                dti.placeholder = '2024-1234567';
                 document.getElementById('dti-required').innerHTML = '<span class="required">*</span>';
-            } else if (type === 'ONE PERSON CORPORATION' || type === 'PARTNERSHIP' || type === 'CORPORATION') {
+            } else if (type === 'ONE PERSON CORPORATION') {
                 sec.disabled = false;
+                sec.placeholder = 'CS2024-12345';
+                document.getElementById('sec-required').innerHTML = '<span class="required">*</span>';
+            } else if (type === 'PARTNERSHIP') {
+                sec.disabled = false;
+                sec.placeholder = 'PN2024-12345';
+                document.getElementById('sec-required').innerHTML = '<span class="required">*</span>';
+            } else if (type === 'CORPORATION') {
+                sec.disabled = false;
+                sec.placeholder = 'CS2024-12345';
                 document.getElementById('sec-required').innerHTML = '<span class="required">*</span>';
             } else if (type === 'COOPERATIVE') {
                 cda.disabled = false;
+                cda.placeholder = '9520-16012345';
                 document.getElementById('cda-required').innerHTML = '<span class="required">*</span>';
             }
         });
@@ -933,6 +997,36 @@
             if (fieldId === 'tin_no' && value) {
                 if (!patterns.tin.test(value)) {
                     showError(fieldId, 'Invalid format. Use: 999-999-999-999');
+                    return false;
+                } else {
+                    clearError(fieldId);
+                    return true;
+                }
+            }
+
+            if (fieldId === 'dti_no' && value) {
+                if (!patterns.dti_no.test(value)) {
+                    showError(fieldId, 'Invalid format. DTI must be 3-30 alphanumeric characters (e.g., 2024-1234567)');
+                    return false;
+                } else {
+                    clearError(fieldId);
+                    return true;
+                }
+            }
+
+            if (fieldId === 'sec_no' && value) {
+                if (!patterns.sec_no.test(value)) {
+                    showError(fieldId, 'Invalid format. SEC must be 3-30 alphanumeric characters (e.g., CS2024-12345)');
+                    return false;
+                } else {
+                    clearError(fieldId);
+                    return true;
+                }
+            }
+
+            if (fieldId === 'cda_no' && value) {
+                if (!patterns.cda_no.test(value)) {
+                    showError(fieldId, 'Invalid format. CDA must be 3-30 alphanumeric characters (e.g., 9520-16012345)');
                     return false;
                 } else {
                     clearError(fieldId);
@@ -1058,10 +1152,20 @@
             let errors = [];
 
             // BIN
-            if (!document.getElementById('bin').value || !validateField('bin', document.getElementById('bin').value)) {
+            const binValue = document.getElementById('bin').value;
+            if (!binValue || !validateField('bin', binValue)) {
                 showError('bin', 'BIN is required and must match format');
                 isValid = false;
                 errors.push('❌ BIN: Must be in format 0000000-0000-0000000');
+            } else {
+                // Check for unique BIN (allow same value if editing existing record)
+                if (records.some((rec, idx) => rec.bin === binValue && idx !== editingIndex)) {
+                    showError('bin', 'BIN already exists. Please use a different BIN.');
+                    isValid = false;
+                    errors.push('❌ BIN: Already exists. Please use a different BIN.');
+                } else {
+                    clearError('bin');
+                }
             }
 
             // Business Name
