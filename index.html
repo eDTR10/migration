@@ -460,8 +460,8 @@
 
                     <div class="form-group">
                         <label>TIN</label>
-                        <input type="text" id="tin_no" placeholder="000-000-000-00000" maxlength="17">
-                        <div class="field-hint">Format: 000-000-000-00000</div>
+                        <input type="text" id="tin_no" placeholder="999-999-999-999" maxlength="15">
+                        <div class="field-hint">Format: 999-999-999-999</div>
                         <div class="error-message" id="tin_no-error"></div>
                     </div>
                 </div>
@@ -719,7 +719,7 @@
             bin: /^\d{7}-\d{4}-\d{7}$/,
             email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
             cellphone: /^639\d{9}$/,
-            tin: /^\d{3}-\d{3}-\d{3}-\d{5}$/
+            tin: /^\d{3}-\d{3}-\d{3}-\d{3}$/
         };
 
         // Initialize UI
@@ -798,7 +798,7 @@
             if (value.length > 3) value = value.slice(0, 3) + '-' + value.slice(3);
             if (value.length > 7) value = value.slice(0, 7) + '-' + value.slice(7);
             if (value.length > 11) value = value.slice(0, 11) + '-' + value.slice(11);
-            e.target.value = value.slice(0, 17);
+            e.target.value = value.slice(0, 15);
             if (e.target.value) validateField('tin_no', e.target.value);
         });
 
@@ -932,7 +932,7 @@
 
             if (fieldId === 'tin_no' && value) {
                 if (!patterns.tin.test(value)) {
-                    showError(fieldId, 'Invalid format. Use: 000-000-000-00000');
+                    showError(fieldId, 'Invalid format. Use: 999-999-999-999');
                     return false;
                 } else {
                     clearError(fieldId);
