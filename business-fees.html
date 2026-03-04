@@ -1015,6 +1015,28 @@
             const r = records[idx];
             if (!r) return;
             const copy = JSON.parse(JSON.stringify(r));
+
+            // Check permit limits — zero out any field that would exceed remaining budget
+            const permit = permitRecords.find(p => p.or_no === copy.application_or_no);
+            if (permit) {
+                ['amount', 'discount', 'interest', 'surcharge'].forEach(field => {
+                    const permitLimit = parseFloat(permit[field] || 0);
+                    const alreadyUsed = records
+                        .filter(rec => rec.business_bin === copy.business_bin && rec.application_or_no === copy.application_or_no)
+                        .reduce((sum, rec) => sum + parseFloat(rec[field] || 0), 0);
+                    const remaining = permitLimit - alreadyUsed;
+                    if (remaining <= 0 || parseFloat(copy[field] || 0) > remaining) {
+                        copy[field] = '0';
+                    }
+                });
+                // Recalculate total after zeroing
+                const a = parseFloat(copy.amount) || 0;
+                const d = parseFloat(copy.discount) || 0;
+                const i = parseFloat(copy.interest) || 0;
+                const s = parseFloat(copy.surcharge) || 0;
+                copy.total = String(Math.max(0, a + i + s - d));
+            }
+
             records.splice(idx + 1, 0, copy);
             saveRecords();
             renderTable();
