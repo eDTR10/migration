@@ -1024,9 +1024,16 @@
         // Format date from YYYY-MM-DD to mm/dd/yyyy format
         function formatDateForCSV(dateStr) {
             if (!dateStr) return '';
-            const [year, month, day] = dateStr.split('-');
-            const formatted = `${month}/${day}/${year}`;
-            return formatted;
+            let month, day, year;
+            if (dateStr.includes('-')) {
+                [year, month, day] = dateStr.split('-');
+            } else if (dateStr.includes('/')) {
+                const clean = dateStr.replace(/^'/, '');
+                [month, day, year] = clean.split('/');
+            } else {
+                return dateStr;
+            }
+            return `="${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}"`;
         }
 
         function generateCSV() {

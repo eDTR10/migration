@@ -606,10 +606,16 @@
         // Format date from YYYY-MM-DD to mm/dd/yyyy with apostrophe prefix to force text format
         function formatDate(dateStr) {
             if (!dateStr) return '';
-            const [year, month, day] = dateStr.split('-');
-            const formatted = `${month}/${day}/${year}`;
-            // Always add apostrophe to force Excel to treat as text
-            return `'${formatted}`;
+            let month, day, year;
+            if (dateStr.includes('-')) {
+                [year, month, day] = dateStr.split('-');
+            } else if (dateStr.includes('/')) {
+                const clean = dateStr.replace(/^'/, '').replace(/^="/, '').replace(/"$/, '');
+                [month, day, year] = clean.split('/');
+            } else {
+                return dateStr;
+            }
+            return `="${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}"`;
         }
 
         function generateCSV() {
