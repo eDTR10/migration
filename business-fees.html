@@ -5,368 +5,179 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Fees - Step 4</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #fbfbfd;
-            padding: 20px;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
+            padding: 14px;
             min-height: 100vh;
         }
-
-        html, body { height: 100%; }
         .container {
-            width: calc(100% - 200px);
-            max-width: none;
-            height: calc(100vh - 80px);
-            margin: 20px auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1900px;
+            height: calc(100vh - 28px);
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 10px 40px rgba(0,0,0,0.1);
             display: grid;
-            grid-template-columns: 1fr 50%;
+            grid-template-columns: 1fr 44%;
+            grid-template-rows: auto 1fr;
             overflow: hidden;
         }
-
         .header {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
-            padding: 18px 24px;
+            padding: 12px 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            grid-column: 1 / -1;
+            gap: 14px;
         }
-
-        .header h1 {
-            font-size: 22px;
-            margin-bottom: 0;
-        }
-
-        .header p {
-            opacity: 0.95;
-            font-size: 13px;
-            margin-top: 2px;
-        }
-
-        .form-container {
-            padding: 24px 30px;
-            overflow-y: auto;
-            height: calc(100vh - 140px);
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #000000;
-            margin: 25px 0 15px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #000000;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #333;
-            font-size: 14px;
-        }
-
-        label .required {
-            color: #e74c3c;
-            margin-left: 3px;
-        }
-
-        .last-field {
-            margin-bottom: 100px;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #000000;
-            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
-        }
-
-        input.error, select.error {
-            border-color: #e74c3c;
-        }
-
-        input.success, select.success {
-            border-color: #2ecc71;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .field-hint {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-top: 3px;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            padding: 14px 22px;
-            background: #f8f9fa;
-            border-top: 1px solid #e0e0e0;
-            position: sticky;
-            bottom: 0;
-            z-index: 5;
-        }
-
-        button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-        }
-
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #7f8c8d;
-        }
-
-        .btn-success {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #27ae60;
-        }
-
-        .records-count {
-            background: #000000;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: inline-block;
-            margin: 10px 0;
-            font-weight: 600;
-        }
-
-        .table-scroll-container {
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-        }
-
-        .row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .row.triple {
-            grid-template-columns: 1fr 1fr 1fr;
-        }
-
-        .records-panel {
-            background: #ffffff;
-            overflow: hidden;
-            height: 80%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #recordsTable button {
-            margin-right: 6px;
-            padding: 6px 8px;
-            border-radius: 6px;
-            border: 0;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        #recordsTable button:nth-child(1) { background: #ffc107; }
-        #recordsTable button:nth-child(2) { background: #17a2b8; color: #fff; }
-        #recordsTable button:nth-child(3) { background: #dc3545; color: #fff; }
-
-        #recordsTable {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-        #recordsTable th, #recordsTable td {
-            padding: 6px;
-            text-align: left;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        #recordsTable thead {
-            border-bottom: 1px solid #e6e6e6;
-        }
-
-        #recordsTable th {
-            cursor: pointer;
-            user-select: none;
-            position: relative;
-            background: #f5f5f5;
-            font-weight: 600;
-        }
-
-        #recordsTable th:hover {
-            background: #e8e8e8;
-        }
-
-        #recordsTable tbody tr {
-            transition: background-color 0.2s;
-        }
-
-        #recordsTable tbody tr:hover {
-            background-color: #f9f3e6;
-        }
-
-        .sort-indicator {
-            margin-left: 5px;
-            font-size: 12px;
-            opacity: 0.6;
-        }
-
-        input:disabled, select:disabled {
-            background-color: #f5f5f5;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .header-links {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
+        .header-brand h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.2; }
+        .header-brand p { font-size: 11.5px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+        .header-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .nav-link {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 12px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.7);
+            padding: 5px 11px; border-radius: 20px; text-decoration: none;
+            font-size: 11.5px; font-weight: 500; border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.18s; white-space: nowrap;
         }
-
-        .nav-link:hover {
-            background: rgba(255,255,255,0.3);
+        .nav-link:hover { background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.25); }
+        .nav-link.active { background: #3b82f6; color: #fff; border-color: #3b82f6; font-weight: 600; }
+        .step-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); font-size: 9.5px; font-weight: 700; flex-shrink: 0;
         }
-
-        .nav-link.active {
-            background: rgba(255,255,255,0.4);
-            font-weight: 600;
+        .nav-link.active .step-badge { background: rgba(255,255,255,0.3); }
+        .header-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.15); margin: 0 4px; flex-shrink: 0; }
+        .btn-danger {
+            padding: 5px 11px; border-radius: 7px; border: none;
+            background: rgba(239,68,68,0.12); color: #ef4444;
+            font-size: 11.5px; font-weight: 600; cursor: pointer;
+            transition: all 0.18s; flex: none;
         }
-
-        .bin-info {
-            background: #e8f4f8;
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid #18b2ef;
-            margin-bottom: 15px;
-            font-size: 13px;
+        .btn-danger:hover { background: rgba(239,68,68,0.22); }
+        .form-container { padding: 18px 26px 16px 26px; overflow-y: auto; flex: 1; }
+        .section-title {
+            font-size: 11px; font-weight: 700; color: #64748b;
+            text-transform: uppercase; letter-spacing: 0.9px;
+            margin: 20px 0 12px 0; padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9; position: relative;
         }
-
-        .bin-info strong {
-            color: #0d5a8f;
+        .section-title::before {
+            content: ''; position: absolute; bottom: -2px; left: 0;
+            width: 36px; height: 2px; background: #3b82f6; border-radius: 2px;
         }
-
-        .bin-total-info {
-            background: #fff3cd;
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid #ffc107;
-            margin-bottom: 15px;
-            font-size: 13px;
+        .section-title:first-child { margin-top: 4px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: 500; color: #374151; font-size: 12.5px; }
+        label .required { color: #ef4444; margin-left: 2px; }
+        input[type="text"], input[type="number"], input[type="date"], select {
+            width: 100%; padding: 8px 11px;
+            border: 1.5px solid #e2e8f0; border-radius: 7px;
+            font-size: 13px; background: #fafafa; color: #1e293b;
+            transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
         }
-
-        .bin-total-info strong {
-            color: #856404;
+        input[type="text"]:hover:not(:disabled), input[type="number"]:hover:not(:disabled),
+        input[type="date"]:hover:not(:disabled), select:hover:not(:disabled) {
+            border-color: #94a3b8; background: #fff;
         }
-
-        .auto-calc {
-            background-color: #f0f0f0;
-            cursor: not-allowed;
+        input:focus, select:focus {
+            outline: none; border-color: #3b82f6; background: #fff;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
         }
-
+        input.error, select.error { border-color: #ef4444; background: #fff7f7; }
+        input.success, select.success { border-color: #10b981; }
+        .error-message { color: #ef4444; font-size: 11px; margin-top: 3px; display: none; align-items: center; gap: 3px; }
+        .error-message.show { display: flex; }
+        .error-message.show::before { content: '⚠'; font-size: 10px; }
+        .field-hint { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+        .button-group {
+            display: flex; gap: 8px; padding: 11px 18px;
+            background: #f8fafc; border-top: 1px solid #e2e8f0;
+            position: sticky; bottom: 0; z-index: 5;
+        }
+        button { flex: 1; padding: 10px 14px; border: none; border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.18s; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.35); }
+        .btn-secondary { background: #f1f5f9; color: #475569; border: 1.5px solid #e2e8f0; }
+        .btn-secondary:hover { background: #e2e8f0; color: #1e293b; }
+        .btn-success { background: #059669; color: #fff; }
+        .btn-success:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,0.35); }
+        .records-panel {
+            background: #fff; border-left: 1px solid #e2e8f0;
+            overflow: hidden; display: flex; flex-direction: column; height: 100%;
+        }
+        .records-panel-header { padding: 14px 18px 10px 18px; border-bottom: 1px solid #f1f5f9; background: #fafafa; flex-shrink: 0; }
+        .records-panel-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .records-panel-title { font-size: 13px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 7px; }
+        .records-count { background: #3b82f6; color: #fff; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .table-scroll-container { flex: 1; overflow-y: auto; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .row.triple { grid-template-columns: 1fr 1fr 1fr; }
+        #recordsTable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        #recordsTable th, #recordsTable td { padding: 7px 10px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        #recordsTable thead { position: sticky; top: 0; z-index: 2; }
+        #recordsTable th {
+            cursor: pointer; user-select: none; background: #f8fafc;
+            font-weight: 600; color: #64748b; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;
+        }
+        #recordsTable th:hover { background: #f1f5f9; color: #1e293b; }
+        #recordsTable tbody tr { transition: background-color 0.12s; }
+        #recordsTable tbody tr:nth-child(even) { background: #fafafa; }
+        #recordsTable tbody tr:hover { background: #eff6ff; }
+        .sort-indicator { margin-left: 3px; font-size: 9px; opacity: 0.6; }
+        #recordsTable button {
+            padding: 3px 8px; border-radius: 5px; border: 1px solid transparent;
+            cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.12s; margin-right: 3px;
+        }
+        #recordsTable button:nth-child(1) { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        #recordsTable button:nth-child(1):hover { background: #fde68a; }
+        #recordsTable button:nth-child(2) { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        #recordsTable button:nth-child(2):hover { background: #bfdbfe; }
+        #recordsTable button:nth-child(3) { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        #recordsTable button:nth-child(3):hover { background: #fecaca; }
+        input:disabled, select:disabled { background-color: #f8fafc; cursor: not-allowed; opacity: 0.55; border-color: #e2e8f0; }
+        .bin-info { background: #eff6ff; padding: 10px 12px; border-radius: 7px; border-left: 3px solid #3b82f6; margin-top: 8px; font-size: 12.5px; color: #1e40af; }
+        .bin-info strong { color: #1e40af; }
+        .bin-total-info { background: #fffbeb; padding: 10px 12px; border-radius: 7px; border-left: 3px solid #f59e0b; margin-top: 8px; font-size: 12.5px; color: #92400e; }
+        .bin-total-info strong { color: #92400e; }
+        .auto-calc { background-color: #f8fafc !important; cursor: not-allowed; }
         @media (max-width: 1100px) {
-            .container { grid-template-columns: 1fr; }
-            .records-panel { order: 2; }
-            .form-container { height: auto; }
+            .container { grid-template-columns: 1fr; height: auto; }
+            .records-panel { order: 3; border-left: none; border-top: 1px solid #e2e8f0; height: 480px; }
             .row.triple { grid-template-columns: 1fr; }
         }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div style="display:flex;flex-direction:column;gap:6px;">
-                <h1>💰 Business Fees <b>(Step 4)</b></h1>
+            <div class="header-brand">
+                <h1>💰 Business Fees</h1>
                 <p>Break down permit fees into individual line items</p>
             </div>
-
             <div class="header-links">
-                <a href="https://edtr10.github.io/migration/" class="nav-link">← Step 1: Registration</a>
-                <a href="business-activity.html" class="nav-link">Step 2: Activity</a>
-                <a href="permit-application.html" class="nav-link">Step 3: Permit</a>
-                <a href="business-fees.html" class="nav-link active">Step 4: Fees →</a>
-                <button onclick="clearAllRecords()" style="padding:6px 12px;background:rgba(220,53,69,0.8);color:white;border:none;border-radius:6px;cursor:pointer;font-size:12px;transition:all 0.3s;" onmouseover="this.style.background='rgba(220,53,69,1)'" onmouseout="this.style.background='rgba(220,53,69,0.8)'">🗑️ Clear All</button>
-                <div class="records-count" style="background-color:#5c787c ;" id="recordCount">Records: 0</div>
+                <a href="https://edtr10.github.io/migration/" class="nav-link"><span class="step-badge">1</span> Registration</a>
+                <a href="business-activity.html" class="nav-link"><span class="step-badge">2</span> Activity</a>
+                <a href="permit-application.html" class="nav-link"><span class="step-badge">3</span> Permit</a>
+                <a href="business-fees.html" class="nav-link active"><span class="step-badge">4</span> Fees</a>
+                <div class="header-divider"></div>
+                <button onclick="clearAllRecords()" class="btn-danger">🗑 Clear All</button>
             </div>
         </div>
 
-        <form id="feesForm">
+        <form id="feesForm" style="display:flex;flex-direction:column;overflow:hidden;">
             <div class="form-container">
                 <!-- BIN AND PERMIT LINK -->
                 <div class="section-title">🔗 Business & Permit Link</div>
@@ -500,7 +311,7 @@
                     </div>
                 </div>
 
-                <div class="form-group last-field">
+                <div class="form-group">
                     <label>Year <span class="required">*</span></label>
                     <input type="number" id="year" min="2000" placeholder="2024" max="2099">
                     <div class="error-message" id="year-error"></div>
@@ -515,11 +326,15 @@
         </form>
 
         <div class="records-panel">
-            <div style="padding:20px 30px 0 30px;">
-                <div class="section-title">💾 Fee Records</div>
-                <input type="text" id="searchRecords" placeholder="Search by BIN or Code..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #ddd;">
+            <div class="records-panel-header">
+                <div class="records-panel-title-row">
+                    <div class="records-panel-title">💾 Fee Records <span class="records-count" id="recordCount">0</span></div>
+                </div>
+                <input type="text" id="searchRecords" placeholder="Search by BIN or Code…"
+                    style="width:100%;padding:7px 11px;border-radius:7px;border:1.5px solid #e2e8f0;font-size:12.5px;background:#fff;color:#1e293b;transition:border-color 0.18s;"
+                    onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
             </div>
-            <div class="table-scroll-container" style="margin: 0 30px 30px 30px;">
+            <div class="table-scroll-container">
                 <table id="recordsTable">
                     <thead>
                         <tr>
@@ -1144,7 +959,7 @@
         }
 
         function updateRecordCount() {
-            document.getElementById('recordCount').textContent = `Records: ${records.length}`;
+            document.getElementById('recordCount').textContent = records.length;
         }
 
         function editRecord(idx) {
