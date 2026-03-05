@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./logo.png" type="image/x-icon">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <title>Permit Application - Step 3</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -368,7 +369,7 @@
             <div class="button-group">
                 <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Record</button>
                 <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
-                <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
+                <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate Excel</button>
             </div>
         </form>
 
@@ -457,9 +458,7 @@
 
         function populateBinDropdown() {
             const select = document.getElementById('business_bin');
-            const firstOption = select.options[0];
-            select.innerHTML = '';
-            select.appendChild(firstOption);
+            select.innerHTML = '<option value="">-- Select a Business --</option>';
 
             businessRecords.forEach(rec => {
                 const opt = document.createElement('option');
@@ -927,12 +926,12 @@
             if (dateStr.includes('-')) {
                 [year, month, day] = dateStr.split('-');
             } else if (dateStr.includes('/')) {
-                const clean = dateStr.replace(/^'/, '');
+                const clean = dateStr.replace(/^'/, '').replace(/^="/, '').replace(/"$/, '');
                 [month, day, year] = clean.split('/');
             } else {
                 return dateStr;
             }
-            return `="${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}"`;
+            return `${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}`;
         }
 
         function generateCSV() {
@@ -941,39 +940,54 @@
                 return;
             }
 
+            const confirmed = confirm(
+                '📊 This will download an Excel file (.xlsx).\n\n' +
+                '⚠️ NOTE: You will need to convert this file to CSV before uploading for migration.\n\n' +
+                'Click OK to proceed.'
+            );
+            if (!confirmed) return;
+
             const headers = [
                 'business_bin', 'application_type', 'application_date', 'year', 'qtr_from', 'qtr_to',
                 'amount', 'discount', 'surcharge', 'interest', 'total', 'issued_date', 'valid_until',
                 'or_no', 'or_date', 'permit_no', 'barangay_clearance_number', 'business_plate_number', 'mode_of_payment'
             ];
 
-            let csv = headers.join(',') + '\n';
+            const dateFields = ['application_date', 'issued_date', 'valid_until', 'or_date'];
 
+            const aoa = [headers];
             records.forEach(record => {
                 const row = headers.map(header => {
                     let value = record[header] || '';
-                    // Format date fields to mm/dd/yyyy with apostrophe for leading zeros
-                    if (value && (header.includes('date') || header === 'dob' || header === 'valid_until')) {
+                    if (value && dateFields.includes(header)) {
                         value = formatDateForCSV(value);
-                    }
-                    if (String(value).includes(',') || String(value).includes('"') || String(value).includes('\n')) {
-                        return `"${String(value).replace(/"/g, '""')}"`;
                     }
                     return value;
                 });
-                csv += row.join(',') + '\n';
+                aoa.push(row);
             });
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+            // Force date columns as text to prevent Excel from reformatting
+            dateFields.forEach(field => {
+                const colIndex = headers.indexOf(field);
+                if (colIndex === -1) return;
+                for (let r = 1; r <= records.length; r++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r, c: colIndex });
+                    if (ws[cellAddress]) {
+                        ws[cellAddress].t = 's';
+                        ws[cellAddress].z = '@';
+                    }
+                }
+            });
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Permit Application');
+
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `permit_application_${timestamp}.csv`;
-
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-
-            alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
+            const filename = `permit_application_${timestamp}.xlsx`;
+            XLSX.writeFile(wb, filename);
         }
     </script>
 </body>
