@@ -173,9 +173,9 @@
                 <p>Break down permit fees into individual line items</p>
             </div>
             <div class="header-links">
-                <a href="https://edtr10.github.io/migration/" class="nav-link"><span class="step-badge">1</span> Registration</a>
-                <a href="business-activity.html" class="nav-link"><span class="step-badge">2</span> Activity</a>
-                <a href="permit-application.html" class="nav-link"><span class="step-badge">3</span> Permit</a>
+                <a href="https://edtr10.github.io/migration/" class="nav-link"><span class="step-badge">1</span> Business</a>
+                <a href="business-activity.html" class="nav-link"><span class="step-badge">2</span> Business Activity</a>
+                <a href="permit-application.html" class="nav-link"><span class="step-badge">3</span> Application</a>
                 <a href="business-fees.html" class="nav-link active"><span class="step-badge">4</span> Fees</a>
                 <div class="header-divider"></div>
                 <button onclick="clearAllRecords()" class="btn-danger">🗑 Clear All</button>
@@ -1089,7 +1089,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `business_fees_${timestamp}.csv`;
+            const filename = `fees_${timestamp}.csv`;
 
             link.href = URL.createObjectURL(blob);
             link.download = filename;
