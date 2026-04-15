@@ -542,12 +542,18 @@
                     <div class="error-message" id="business_type-error"></div>
                 </div>
 
-                <div class="row">
+                <div class="row triple">
                     <div class="form-group">
                         <label>DTI Number <span id="dti-required"></span></label>
                         <input type="text" id="dti_no" placeholder="2024-1234567" maxlength="30" disabled>
                         <div class="field-hint">Format: YYYY-###### (e.g., 2024-1234567)</div>
                         <div class="error-message" id="dti_no-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>DTI Registration Expiry Date <span id="dti-expiry-required"></span></label>
+                        <input type="date" id="dti_registration_expiry_date" disabled>
+                        <div class="error-message" id="dti_registration_expiry_date-error"></div>
                     </div>
 
                     <div class="form-group">
@@ -977,25 +983,31 @@
         document.getElementById('business_type').addEventListener('change', function() {
             const type = this.value;
             const dti = document.getElementById('dti_no');
+            const dtiExpiry = document.getElementById('dti_registration_expiry_date');
             const sec = document.getElementById('sec_no');
             const cda = document.getElementById('cda_no');
 
             // Reset all
             dti.disabled = true;
+            dtiExpiry.disabled = true;
             sec.disabled = true;
             cda.disabled = true;
             dti.value = '';
+            dtiExpiry.value = '';
             sec.value = '';
             cda.value = '';
             document.getElementById('dti-required').innerHTML = '';
+            document.getElementById('dti-expiry-required').innerHTML = '';
             document.getElementById('sec-required').innerHTML = '';
             document.getElementById('cda-required').innerHTML = '';
 
             // Enable based on type
             if (type === 'SOLE PROPRIETORSHIP') {
                 dti.disabled = false;
+                dtiExpiry.disabled = false;
                 dti.placeholder = '2024-1234567';
                 document.getElementById('dti-required').innerHTML = '<span class="required">*</span>';
+                document.getElementById('dti-expiry-required').innerHTML = '<span class="required">*</span>';
             } else if (type === 'ONE PERSON CORPORATION') {
                 sec.disabled = false;
                 sec.placeholder = 'CS2024-12345';
@@ -1297,6 +1309,11 @@
                 isValid = false;
                 errors.push('❌ DTI Number: Required for Sole Proprietorship');
             }
+            if (businessType === 'SOLE PROPRIETORSHIP' && !document.getElementById('dti_registration_expiry_date').value) {
+                showError('dti_registration_expiry_date', 'DTI registration expiry date is required for Sole Proprietorship');
+                isValid = false;
+                errors.push('❌ DTI Registration Expiry Date: Required for Sole Proprietorship');
+            }
             if ((businessType === 'ONE PERSON CORPORATION' || businessType === 'PARTNERSHIP' || businessType === 'CORPORATION') && !document.getElementById('sec_no').value) {
                 showError('sec_no', 'SEC number is required for this business type');
                 isValid = false;
@@ -1438,6 +1455,7 @@
                 trade_name: document.getElementById('trade_name').value,
                 business_type: document.getElementById('business_type').value,
                 dti_no: document.getElementById('dti_no').value,
+                dti_registration_expiry_date: document.getElementById('dti_registration_expiry_date').value,
                 sec_no: document.getElementById('sec_no').value,
                 cda_no: document.getElementById('cda_no').value,
                 tin_no: document.getElementById('tin_no').value,
@@ -1506,6 +1524,7 @@
             
             // Reset disabled fields
             document.getElementById('dti_no').disabled = true;
+            document.getElementById('dti_registration_expiry_date').disabled = true;
             document.getElementById('sec_no').disabled = true;
             document.getElementById('cda_no').disabled = true;
             document.getElementById('tdn_no').disabled = true;
@@ -1515,6 +1534,7 @@
 
             // Reset required indicators
             document.getElementById('dti-required').innerHTML = '';
+            document.getElementById('dti-expiry-required').innerHTML = '';
             document.getElementById('sec-required').innerHTML = '';
             document.getElementById('cda-required').innerHTML = '';
             document.getElementById('tdn-required').innerHTML = '';
@@ -1577,7 +1597,7 @@
             }
 
             // 4) ensure conditional registration fields (which change handlers sometimes clear) are set explicitly AFTER handlers
-            ['dti_no','sec_no','cda_no','tdn_no','pin_no','lessor_name','monthly_rental'].forEach(id => {
+            ['dti_no','dti_registration_expiry_date','sec_no','cda_no','tdn_no','pin_no','lessor_name','monthly_rental'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el && r[id] !== undefined && r[id] !== null){ el.value = r[id]; }
             });
@@ -1626,7 +1646,7 @@
             }
 
             const headers = [
-                'bin', 'business_name', 'trade_name', 'business_type', 'dti_no', 'sec_no', 'cda_no',
+                'bin', 'business_name', 'trade_name', 'business_type', 'dti_no', 'dti_registration_expiry_date', 'sec_no', 'cda_no',
                 'tin_no', 'email_address', 'cellphone_no', 'telephone_no', 'incharge_first_name',
                 'incharge_middle_name', 'incharge_last_name', 'incharge_extension_name', 'incharge_sex',
                 'incharge_country_of_citizenship', 'incharge_street', 'incharge_barangay',
