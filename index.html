@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./logo.png" type="image/x-icon">
-    <title>Business Registration CSV Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Business Registration Excel Generator</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -788,7 +789,7 @@
             <div class="button-group">
                 <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Record</button>
                 <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
-                <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
+                <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate Excel</button>
             </div>
         </form>
 
@@ -1630,20 +1631,27 @@
             if (dateStr.includes('-')) {
                 [year, month, day] = dateStr.split('-');
             } else if (dateStr.includes('/')) {
-                const clean = dateStr.replace(/^'/, '');
+                const clean = dateStr.replace(/^'/, '').replace(/^="/, '').replace(/"$/, '');
                 [month, day, year] = clean.split('/');
             } else {
                 return dateStr;
             }
-            return `="${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}"`;
+            return `${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}`;
         }
 
-        // Generate CSV uses current records (saved)
+        // Generate Excel uses current records (saved)
         function generateCSV() {
             if (records.length === 0) {
                 alert('⚠️ No records to generate! Please add at least one record.');
                 return;
             }
+
+            const confirmed = confirm(
+                '📊 This will download an Excel file (.xlsx).\n\n' +
+                '⚠️ NOTE: You will need to convert this file to CSV before uploading for migration.\n\n' +
+                'Click OK to proceed.'
+            );
+            if (!confirmed) return;
 
             const headers = [
                 'bin', 'business_name', 'trade_name', 'business_type', 'dti_no', 'dti_registration_expiry_date', 'sec_no', 'cda_no',
@@ -1656,35 +1664,41 @@
                 'no_of_van', 'no_of_truck', 'no_of_motorcycle', 'activity_type'
             ];
 
-            let csv = headers.join(',') + '\n';
+            const dateFields = headers.filter(h => h.includes('date') || h === 'dob');
 
+            const aoa = [headers];
             records.forEach(record => {
                 const row = headers.map(header => {
                     let value = record[header] || '';
-                    // Format date fields to mm/dd/yyyy with apostrophe for leading zeros
-                    if (value && (header.includes('date') || header === 'dob')) {
+                    if (value && dateFields.includes(header)) {
                         value = formatDateForCSV(value);
-                    }
-                    // Escape commas and quotes
-                    if (String(value).includes(',') || String(value).includes('"') || String(value).includes('\n')) {
-                        return `"${String(value).replace(/"/g, '""')}"`;
                     }
                     return value;
                 });
-                csv += row.join(',') + '\n';
+                aoa.push(row);
             });
 
-            // Create download
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `Business${timestamp}.csv`;
-            
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
 
-            alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
+            // Force date columns as text to prevent Excel from reformatting
+            dateFields.forEach(field => {
+                const colIndex = headers.indexOf(field);
+                if (colIndex === -1) return;
+                for (let r = 1; r <= records.length; r++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r, c: colIndex });
+                    if (ws[cellAddress]) {
+                        ws[cellAddress].t = 's';
+                        ws[cellAddress].z = '@';
+                    }
+                }
+            });
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Business Records');
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `Business_${timestamp}.xlsx`;
+            XLSX.writeFile(wb, filename);
         }
 
     </script>
