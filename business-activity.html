@@ -198,14 +198,14 @@
                     <div class="form-group">
                         <label>Business Line Code <span class="required">*</span></label>
                         <input type="text" id="business_line_code" placeholder="e.g. 47219" maxlength="20">
-                        <div class="field-hint">Must exist in business line system</div>
+                        <div class="field-hint">PSIC code &nbsp;·&nbsp; e.g., 47219 &nbsp;·&nbsp; 56101 &nbsp;·&nbsp; 47110</div>
                         <div class="error-message" id="business_line_code-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Capital Amount</label>
                         <input type="number" id="capital_amount" placeholder="e.g. 300000" min="0" value="0">
-                        <div class="field-hint">Input 0 if not applicable</div>
+                        <div class="field-hint">Amount in Peso &nbsp;·&nbsp; e.g., 300000 (enter 0 if not applicable)</div>
                         <div class="error-message" id="capital_amount-error"></div>
                     </div>
                 </div>
@@ -214,14 +214,14 @@
                     <div class="form-group">
                         <label>Gross Amount Essential</label>
                         <input type="number" id="gross_amount_essential" placeholder="e.g. 50000" value="0" min="0" oninput="calculateGrossAmount()">
-                        <div class="field-hint">Leave blank if not applicable</div>
+                        <div class="field-hint">Amount in Peso &nbsp;·&nbsp; e.g., 50000 (enter 0 if not applicable)</div>
                         <div class="error-message" id="gross_amount_essential-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Gross Amount Non-Essential</label>
                         <input type="number" id="gross_amount_nonessential" placeholder="e.g. 50000" value="0" min="0" oninput="calculateGrossAmount()">
-                        <div class="field-hint">Leave blank if not applicable</div>
+                        <div class="field-hint">Amount in Peso &nbsp;·&nbsp; e.g., 50000 (enter 0 if not applicable)</div>
                         <div class="error-message" id="gross_amount_nonessential-error"></div>
                     </div>
                 </div>
@@ -229,14 +229,14 @@
                 <div class="form-group">
                     <label>Gross Amount (Auto-calculated)</label>
                     <input type="number" id="gross_amount" disabled placeholder="0" value="0" style="background-color: #f0f0f0; cursor: not-allowed;">
-                    <div class="field-hint">Automatically calculated as Essential + Non-Essential</div>
+                    <div class="field-hint">Auto-calculated: Essential + Non-Essential</div>
                     <div class="error-message" id="gross_amount-error"></div>
                 </div>
 
                 <div class="form-group">
                     <label>Retired Date</label>
                     <input type="date" id="retired_date">
-                    <div class="field-hint">Leave blank if business is active (MM/DD/YYYY format)</div>
+                    <div class="field-hint">Leave blank if business is still active &nbsp;·&nbsp; e.g., 12/31/2023</div>
                     <div class="error-message" id="retired_date-error"></div>
                 </div>
             </div>
@@ -615,7 +615,7 @@
             } else {
                 return dateStr;
             }
-            return `="${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}"`;
+            return `${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}`;
         }
 
         function generateCSV() {
@@ -649,15 +649,17 @@
                 csv += row.join(',') + '\n';
             });
 
-            // Create download
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `Business_activities${timestamp}.csv`;
+            const filename = `Business_activities_${timestamp}.csv`;
 
             link.href = URL.createObjectURL(blob);
             link.download = filename;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
 
             alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
         }

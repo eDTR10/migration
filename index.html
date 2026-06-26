@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./logo.png" type="image/x-icon">
-    <title>Business Registration CSV Generator</title>
+    <title>Business Registration Excel Generator</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -512,7 +512,7 @@
                 <div class="form-group">
                     <label>BIN <span class="required">*</span></label>
                     <input type="text" id="bin" placeholder="0000000-0000-0000000" maxlength="22">
-                    <div class="field-hint">Format: 0000000-0000-0000000</div>
+                    <div class="field-hint">Format: 0000000-0000-0000000 &nbsp;·&nbsp; e.g., 1001301-2024-0000001</div>
                     <div class="error-message" id="bin-error"></div>
                 </div>
 
@@ -520,12 +520,14 @@
                     <div class="form-group">
                         <label>Business Name <span class="required">*</span></label>
                         <input type="text" id="business_name" placeholder="Enter business name" maxlength="100">
+                        <div class="field-hint">e.g., Juan's General Merchandise</div>
                         <div class="error-message" id="business_name-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Trade Name</label>
                         <input type="text" id="trade_name" placeholder="Optional" maxlength="100">
+                        <div class="field-hint">e.g., Juan's Store (if different from business name)</div>
                     </div>
                 </div>
 
@@ -546,20 +548,21 @@
                     <div class="form-group">
                         <label>DTI Number <span id="dti-required"></span></label>
                         <input type="text" id="dti_no" placeholder="2024-1234567" maxlength="30" disabled>
-                        <div class="field-hint">Format: YYYY-###### (e.g., 2024-1234567)</div>
+                        <div class="field-hint">Format: YYYY-####### &nbsp;·&nbsp; e.g., 2024-1234567</div>
                         <div class="error-message" id="dti_no-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>DTI Registration Expiry Date <span id="dti-expiry-required"></span></label>
                         <input type="date" id="dti_registration_expiry_date" disabled>
+                        <div class="field-hint">e.g., 5 years from registration date</div>
                         <div class="error-message" id="dti_registration_expiry_date-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>SEC Number <span id="sec-required"></span></label>
                         <input type="text" id="sec_no" placeholder="CS2024-12345 or PN2024-12345" maxlength="30" disabled>
-                        <div class="field-hint">Format: XX####-##### (CS for Corporation, PN for Partnership)</div>
+                        <div class="field-hint">CS = Corp/OPC &nbsp;·&nbsp; PN = Partnership &nbsp;·&nbsp; e.g., CS2024-12345</div>
                         <div class="error-message" id="sec_no-error"></div>
                     </div>
                 </div>
@@ -568,14 +571,14 @@
                     <div class="form-group">
                         <label>CDA Number <span id="cda-required"></span></label>
                         <input type="text" id="cda_no" placeholder="9520-16012345" maxlength="30" disabled>
-                        <div class="field-hint">Format: ####-######## (e.g., 9520-16012345)</div>
+                        <div class="field-hint">Format: ####-######## &nbsp;·&nbsp; e.g., 9520-16012345</div>
                         <div class="error-message" id="cda_no-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>TIN</label>
-                        <input type="text" id="tin_no" placeholder="999-999-999-999" maxlength="15">
-                        <div class="field-hint">Format: 999-999-999-999</div>
+                        <input type="text" id="tin_no" placeholder="999-999-999-99999" maxlength="17">
+                        <div class="field-hint">Format: 999-999-999-99999 &nbsp;·&nbsp; e.g., 123-456-789-12345</div>
                         <div class="error-message" id="tin_no-error"></div>
                     </div>
                 </div>
@@ -587,13 +590,14 @@
                     <div class="form-group">
                         <label>Email Address <span class="required">*</span></label>
                         <input type="email" id="email_address" placeholder="email@example.com">
+                        <div class="field-hint">e.g., juandelacruz@gmail.com</div>
                         <div class="error-message" id="email_address-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Cellphone <span class="required">*</span></label>
                         <input type="text" id="cellphone_no" placeholder="639XXXXXXXXX" maxlength="12">
-                        <div class="field-hint">Format: 639XXXXXXXXX</div>
+                        <div class="field-hint">Format: 639XXXXXXXXX &nbsp;·&nbsp; e.g., 639912345678</div>
                         <div class="error-message" id="cellphone_no-error"></div>
                     </div>
                 </div>
@@ -601,6 +605,7 @@
                 <div class="form-group">
                     <label>Telephone</label>
                     <input type="text" id="telephone_no" placeholder="Optional" maxlength="20">
+                    <div class="field-hint">e.g., 028-123-4567 (leave blank if none)</div>
                 </div>
 
                 <!-- PERSON IN CHARGE -->
@@ -610,12 +615,14 @@
                     <div class="form-group">
                         <label>First Name <span class="required">*</span></label>
                         <input type="text" id="incharge_first_name" maxlength="100">
+                        <div class="field-hint">e.g., Juan</div>
                         <div class="error-message" id="incharge_first_name-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Middle Name</label>
                         <input type="text" id="incharge_middle_name" maxlength="100">
+                        <div class="field-hint">e.g., Santos (leave blank if none)</div>
                     </div>
                 </div>
 
@@ -623,12 +630,14 @@
                     <div class="form-group">
                         <label>Last Name <span class="required">*</span></label>
                         <input type="text" id="incharge_last_name" maxlength="100">
+                        <div class="field-hint">e.g., Dela Cruz</div>
                         <div class="error-message" id="incharge_last_name-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Extension Name</label>
                         <input type="text" id="incharge_extension_name" placeholder="JR, SR, III (no period)" maxlength="100">
+                        <div class="field-hint">e.g., JR &nbsp;·&nbsp; SR &nbsp;·&nbsp; III (leave blank if none)</div>
                     </div>
                 </div>
 
@@ -645,6 +654,7 @@
                     <div class="form-group">
                         <label>Country of Citizenship <span class="required">*</span></label>
                         <input type="text" id="incharge_country_of_citizenship" value="PHL" maxlength="100">
+                        <div class="field-hint">e.g., PHL (Philippines) &nbsp;·&nbsp; USA &nbsp;·&nbsp; CHN</div>
                         <div class="error-message" id="incharge_country_of_citizenship-error"></div>
                     </div>
                 </div>
@@ -652,18 +662,21 @@
                 <div class="form-group">
                     <label>Street Address</label>
                     <input type="text" id="incharge_street" placeholder="Optional" maxlength="100">
+                    <div class="field-hint">e.g., 123 Rizal Street (leave blank if none)</div>
                 </div>
 
                 <div class="row">
                     <div class="form-group">
                         <label>Barangay <span class="required">*</span></label>
                         <input type="text" id="incharge_barangay" maxlength="100">
+                        <div class="field-hint">e.g., Brgy. Poblacion</div>
                         <div class="error-message" id="incharge_barangay-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Municipality <span class="required">*</span></label>
                         <input type="text" id="incharge_municipality" maxlength="100">
+                        <div class="field-hint">e.g., Makati City</div>
                         <div class="error-message" id="incharge_municipality-error"></div>
                     </div>
                 </div>
@@ -671,6 +684,7 @@
                 <div class="form-group">
                     <label>Province <span class="required">*</span></label>
                     <input type="text" id="incharge_province" maxlength="100">
+                    <div class="field-hint">e.g., Metro Manila</div>
                     <div class="error-message" id="incharge_province-error"></div>
                 </div>
 
@@ -680,11 +694,13 @@
                 <div class="form-group">
                     <label>Office Street</label>
                     <input type="text" id="office_street" maxlength="100">
+                    <div class="field-hint">e.g., 456 Ayala Avenue (leave blank if none)</div>
                 </div>
 
                 <div class="form-group">
                     <label>Office Barangay Code <span class="required">*</span></label>
                     <input type="text" id="office_barangay_code" placeholder="Geocode of Barangay">
+                    <div class="field-hint">9-digit PSGC geocode &nbsp;·&nbsp; e.g., 137604001</div>
                     <div class="error-message" id="office_barangay_code-error"></div>
                 </div>
 
@@ -701,12 +717,14 @@
                     <div class="form-group">
                         <label>TDN Number <span id="tdn-required"></span></label>
                         <input type="text" id="tdn_no" maxlength="20" disabled>
+                        <div class="field-hint">Tax Declaration Number &nbsp;·&nbsp; e.g., 12-345-67890</div>
                         <div class="error-message" id="tdn_no-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>PIN Number <span id="pin-required"></span></label>
                         <input type="text" id="pin_no" maxlength="20" disabled>
+                        <div class="field-hint">Property Index Number &nbsp;·&nbsp; e.g., 137-12-001-001-000</div>
                         <div class="error-message" id="pin_no-error"></div>
                     </div>
                 </div>
@@ -715,12 +733,14 @@
                     <div class="form-group">
                         <label>Lessor Name <span id="lessor-required"></span></label>
                         <input type="text" id="lessor_name" maxlength="150" disabled>
+                        <div class="field-hint">e.g., Maria Santos (full name of property owner)</div>
                         <div class="error-message" id="lessor_name-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Monthly Rental <span id="rental-required"></span></label>
                         <input type="number" id="monthly_rental" min="0" disabled>
+                        <div class="field-hint">Amount in Philippine Peso &nbsp;·&nbsp; e.g., 15000</div>
                         <div class="error-message" id="monthly_rental-error"></div>
                     </div>
                 </div>
@@ -731,6 +751,7 @@
                 <div class="form-group">
                     <label>Total Floor Area (sqm) <span class="required">*</span></label>
                     <input type="number" id="area" min="0">
+                    <div class="field-hint">Total area in square meters &nbsp;·&nbsp; e.g., 50</div>
                     <div class="error-message" id="area-error"></div>
                 </div>
 
@@ -738,12 +759,14 @@
                     <div class="form-group">
                         <label>Male Employees <span class="required">*</span></label>
                         <input type="number" id="no_of_male_employees" min="0" value="0">
+                        <div class="field-hint">e.g., 3 (enter 0 if none)</div>
                         <div class="error-message" id="no_of_male_employees-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Female Employees <span class="required">*</span></label>
                         <input type="number" id="no_of_female_employees" min="0" value="0">
+                        <div class="field-hint">e.g., 2 (enter 0 if none)</div>
                         <div class="error-message" id="no_of_female_employees-error"></div>
                     </div>
                 </div>
@@ -759,17 +782,20 @@
                     <div class="form-group">
                         <label>Number of Vans <span class="required">*</span></label>
                         <input type="number" id="no_of_van" min="0" value="0">
+                        <div class="field-hint">e.g., 1 (enter 0 if none)</div>
                     </div>
 
                     <div class="form-group">
                         <label>Number of Trucks <span class="required">*</span></label>
                         <input type="number" id="no_of_truck" min="0" value="0">
+                        <div class="field-hint">e.g., 2 (enter 0 if none)</div>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Number of Motorcycles <span class="required">*</span></label>
                     <input type="number" id="no_of_motorcycle" min="0" value="0">
+                    <div class="field-hint">e.g., 1 (enter 0 if none)</div>
                 </div>
                 <div class="form-group">
                     <label>Activity Type <span class="required">*</span></label>
@@ -835,7 +861,7 @@
             bin: /^\d{7}-\d{4}-\d{7}$/,
             email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
             cellphone: /^639\d{9}$/,
-            tin: /^\d{3}-\d{3}-\d{3}-\d{3}$/,
+            tin: /^\d{3}-\d{3}-\d{3}-\d{5}$/,
             dti_no: /^[a-zA-Z0-9-]{3,30}$/,
             sec_no: /^[a-zA-Z0-9-]{3,30}$/,
             cda_no: /^[a-zA-Z0-9-]{3,30}$/
@@ -917,7 +943,7 @@
             if (value.length > 3) value = value.slice(0, 3) + '-' + value.slice(3);
             if (value.length > 7) value = value.slice(0, 7) + '-' + value.slice(7);
             if (value.length > 11) value = value.slice(0, 11) + '-' + value.slice(11);
-            e.target.value = value.slice(0, 15);
+            e.target.value = value.slice(0, 17);
             if (e.target.value) validateField('tin_no', e.target.value);
         });
 
@@ -1115,7 +1141,7 @@
 
             if (fieldId === 'tin_no' && value) {
                 if (!patterns.tin.test(value)) {
-                    showError(fieldId, 'Invalid format. Use: 999-999-999-999');
+                    showError(fieldId, 'Invalid format. Use: 999-999-999-99999');
                     return false;
                 } else {
                     clearError(fieldId);
@@ -1630,20 +1656,22 @@
             if (dateStr.includes('-')) {
                 [year, month, day] = dateStr.split('-');
             } else if (dateStr.includes('/')) {
-                const clean = dateStr.replace(/^'/, '');
+                const clean = dateStr.replace(/^'/, '').replace(/^="/, '').replace(/"$/, '');
                 [month, day, year] = clean.split('/');
             } else {
                 return dateStr;
             }
-            return `="${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}"`;
+            return `${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}`;
         }
 
-        // Generate CSV uses current records (saved)
+        // Generate CSV — dates wrapped in ="..." so Excel keeps them as text (mm/dd/yyyy)
         function generateCSV() {
             if (records.length === 0) {
                 alert('⚠️ No records to generate! Please add at least one record.');
                 return;
             }
+
+            if (!confirm('📊 This will download a CSV file (.csv) ready for migration upload.\n\nClick OK to proceed.')) return;
 
             const headers = [
                 'bin', 'business_name', 'trade_name', 'business_type', 'dti_no', 'dti_registration_expiry_date', 'sec_no', 'cda_no',
@@ -1656,35 +1684,39 @@
                 'no_of_van', 'no_of_truck', 'no_of_motorcycle', 'activity_type'
             ];
 
-            let csv = headers.join(',') + '\n';
+            const dateFields = new Set(headers.filter(h => h.includes('date') || h === 'dob'));
 
+            function csvCell(value) {
+                const s = String(value == null ? '' : value);
+                if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+                    return '"' + s.replace(/"/g, '""') + '"';
+                }
+                return s;
+            }
+
+            const rows = [headers.join(',')];
             records.forEach(record => {
                 const row = headers.map(header => {
                     let value = record[header] || '';
-                    // Format date fields to mm/dd/yyyy with apostrophe for leading zeros
-                    if (value && (header.includes('date') || header === 'dob')) {
-                        value = formatDateForCSV(value);
+                    if (value && dateFields.has(header)) {
+                        return csvCell(formatDateForCSV(value));
                     }
-                    // Escape commas and quotes
-                    if (String(value).includes(',') || String(value).includes('"') || String(value).includes('\n')) {
-                        return `"${String(value).replace(/"/g, '""')}"`;
-                    }
-                    return value;
+                    return csvCell(value);
                 });
-                csv += row.join(',') + '\n';
+                rows.push(row.join(','));
             });
 
-            // Create download
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
+            // UTF-8 BOM so Excel opens with correct encoding
+            const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `Business${timestamp}.csv`;
-            
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            link.click();
-
-            alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
+            a.download = `Business_${timestamp}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
     </script>

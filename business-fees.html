@@ -214,7 +214,7 @@
                     <div class="form-group">
                         <label>Fee Code <span class="required">*</span></label>
                         <input type="text" id="code" placeholder="GF-01" maxlength="20">
-                        <div class="field-hint">Alphanumeric, min: 2 chars, max: 20 chars</div>
+                        <div class="field-hint">Alphanumeric &nbsp;·&nbsp; e.g., GF-01 &nbsp;·&nbsp; LIC-001 &nbsp;·&nbsp; SAN-02</div>
                         <div class="error-message" id="code-error"></div>
                     </div>
 
@@ -236,7 +236,7 @@
                 <div class="form-group">
                     <label>Fee Description <span class="required">*</span></label>
                     <input type="text" id="description" placeholder="Garbage Fee" maxlength="100">
-                    <div class="field-hint">Min: 2 chars, max: 100 chars</div>
+                    <div class="field-hint">e.g., Garbage Fee &nbsp;·&nbsp; Business License Fee &nbsp;·&nbsp; Sanitary Permit Fee</div>
                     <div class="error-message" id="description-error"></div>
                 </div>
 
@@ -319,6 +319,7 @@
                 <div class="form-group">
                     <label>Year <span class="required">*</span></label>
                     <input type="number" id="year" min="2000" placeholder="2024" max="2099">
+                    <div class="field-hint">4-digit year &nbsp;·&nbsp; e.g., 2024 (auto-filled from permit)</div>
                     <div class="error-message" id="year-error"></div>
                 </div>
             </div>
@@ -1055,7 +1056,7 @@
             } else {
                 return dateStr;
             }
-            return `="${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}"`;
+            return `${String(month).padStart(2,'0')}/${String(day).padStart(2,'0')}/${year}`;
         }
 
         function generateCSV() {
@@ -1086,14 +1087,17 @@
                 csv += row.join(',') + '\n';
             });
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
             const filename = `fees_${timestamp}.csv`;
 
             link.href = URL.createObjectURL(blob);
             link.download = filename;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
 
             alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
         }

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="./logo.png" type="image/x-icon">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <title>Permit Application - Step 3</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -208,13 +207,14 @@
                             <option value="R">R - RENEWAL</option>
                             <option value="Q">Q - QUARTERLY</option>
                         </select>
+                        <div class="field-hint">N = New business &nbsp;·&nbsp; R = Renewal &nbsp;·&nbsp; Q = Quarterly</div>
                         <div class="error-message" id="application_type-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Application Date <span class="required">*</span></label>
                         <input type="date" id="application_date">
-                        <div class="field-hint">mm/dd/yyyy</div>
+                        <div class="field-hint">Date the application was filed &nbsp;·&nbsp; e.g., 01/15/2024</div>
                         <div class="error-message" id="application_date-error"></div>
                     </div>
                 </div>
@@ -223,6 +223,7 @@
                     <div class="form-group">
                         <label>Year <span class="required">*</span></label>
                         <input type="number" id="year" min="2000" placeholder="2024" max="2099">
+                        <div class="field-hint">4-digit permit year &nbsp;·&nbsp; e.g., 2024</div>
                         <div class="error-message" id="year-error"></div>
                     </div>
 
@@ -233,6 +234,7 @@
                             <option value="ONLINE">ONLINE</option>
                             <option value="MANUAL">MANUAL</option>
                         </select>
+                        <div class="field-hint">How the payment was made</div>
                         <div class="error-message" id="mode_of_payment-error"></div>
                     </div>
                 </div>
@@ -274,12 +276,14 @@
                     <div class="form-group">
                         <label>Amount <span class="required">*</span></label>
                         <input type="number" id="amount" min="0" placeholder="10000" oninput="calculateTotal()">
+                        <div class="field-hint">Total base permit amount in Peso &nbsp;·&nbsp; e.g., 10000</div>
                         <div class="error-message" id="amount-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Discount <span class="required">*</span></label>
                         <input type="number" id="discount" min="0" placeholder="100" value="0" oninput="calculateTotal()">
+                        <div class="field-hint">Amount deducted from total &nbsp;·&nbsp; e.g., 100 (enter 0 if none)</div>
                         <div class="error-message" id="discount-error"></div>
                     </div>
                 </div>
@@ -288,12 +292,14 @@
                     <div class="form-group">
                         <label>Surcharge <span class="required">*</span></label>
                         <input type="number" id="surcharge" min="0" placeholder="2000" value="0" oninput="calculateTotal()">
+                        <div class="field-hint">Penalty amount added &nbsp;·&nbsp; e.g., 2000 (enter 0 if none)</div>
                         <div class="error-message" id="surcharge-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Interest <span class="required">*</span></label>
                         <input type="number" id="interest" min="0" placeholder="2000" value="0" oninput="calculateTotal()">
+                        <div class="field-hint">Interest amount added &nbsp;·&nbsp; e.g., 500 (enter 0 if none)</div>
                         <div class="error-message" id="interest-error"></div>
                     </div>
                 </div>
@@ -311,14 +317,14 @@
                     <div class="form-group">
                         <label>Issued Date <span class="required">*</span></label>
                         <input type="date" id="issued_date">
-                        <div class="field-hint">mm/dd/yyyy</div>
+                        <div class="field-hint">Date permit was issued &nbsp;·&nbsp; e.g., 01/20/2024</div>
                         <div class="error-message" id="issued_date-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>Valid Until <span class="required">*</span></label>
                         <input type="date" id="valid_until">
-                        <div class="field-hint">mm/dd/yyyy</div>
+                        <div class="field-hint">Permit expiry date &nbsp;·&nbsp; e.g., 12/31/2024</div>
                         <div class="error-message" id="valid_until-error"></div>
                     </div>
                 </div>
@@ -330,14 +336,14 @@
                     <div class="form-group">
                         <label>OR Number <span class="required">*</span></label>
                         <input type="text" id="or_no" placeholder="U12345678" maxlength="50">
-                        <div class="field-hint">Official Receipt Number (must be unique)</div>
+                        <div class="field-hint">Official Receipt Number — must be unique &nbsp;·&nbsp; e.g., U12345678</div>
                         <div class="error-message" id="or_no-error"></div>
                     </div>
 
                     <div class="form-group">
                         <label>OR Date <span class="required">*</span></label>
                         <input type="date" id="or_date">
-                        <div class="field-hint">mm/dd/yyyy</div>
+                        <div class="field-hint">Date on the official receipt &nbsp;·&nbsp; e.g., 01/20/2024</div>
                         <div class="error-message" id="or_date-error"></div>
                     </div>
                 </div>
@@ -349,27 +355,27 @@
                     <div class="form-group">
                         <label>Permit Number</label>
                         <input type="text" id="permit_no" placeholder="A-0001" maxlength="50">
-                        <div class="field-hint">Permit number issued (alphanumeric)</div>
+                        <div class="field-hint">Permit number issued &nbsp;·&nbsp; e.g., A-0001 (leave blank if not yet issued)</div>
                     </div>
 
                     <div class="form-group">
                         <label>Business Plate Number</label>
                         <input type="text" id="business_plate_number" placeholder="AA-0001" maxlength="50">
-                        <div class="field-hint">Business license plate number</div>
+                        <div class="field-hint">e.g., AA-0001 (leave blank if not yet assigned)</div>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Barangay Clearance Number</label>
                     <input type="text" id="barangay_clearance_number" placeholder="ABC-123" maxlength="50">
-                    <div class="field-hint">Barangay Business Clearance number (sets status to ISSUED)</div>
+                    <div class="field-hint">e.g., ABC-123 &nbsp;·&nbsp; Providing this sets status to ISSUED (leave blank if pending)</div>
                 </div>
             </div>
 
             <div class="button-group">
                 <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Record</button>
                 <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
-                <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate Excel</button>
+                <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
             </div>
         </form>
 
@@ -472,11 +478,22 @@
             }
         }
 
+        function applyBinYearIfNew() {
+            const appType = document.getElementById('application_type').value;
+            if (appType !== 'N') return;
+            const bin = document.getElementById('business_bin').value;
+            if (!bin) return;
+            const parts = bin.split('-');
+            if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
+                document.getElementById('year').value = parts[1];
+            }
+        }
+
         // Show business info when BIN selected
         document.getElementById('business_bin').addEventListener('change', function() {
             const bin = this.value;
             const info = document.getElementById('binInfo');
-            
+
             if (bin) {
                 const business = businessRecords.find(b => b.bin === bin);
                 if (business) {
@@ -485,9 +502,14 @@
                 } else {
                     info.style.display = 'none';
                 }
+                applyBinYearIfNew();
             } else {
                 info.style.display = 'none';
             }
+        });
+
+        document.getElementById('application_type').addEventListener('change', function() {
+            applyBinYearIfNew();
         });
 
         function calculateTotal() {
@@ -940,12 +962,7 @@
                 return;
             }
 
-            const confirmed = confirm(
-                '📊 This will download an Excel file (.xlsx).\n\n' +
-                '⚠️ NOTE: You will need to convert this file to CSV before uploading for migration.\n\n' +
-                'Click OK to proceed.'
-            );
-            if (!confirmed) return;
+            if (!confirm('📊 This will download a CSV file (.csv) ready for migration upload.\n\nClick OK to proceed.')) return;
 
             const headers = [
                 'business_bin', 'application_type', 'application_date', 'year', 'qtr_from', 'qtr_to',
@@ -953,41 +970,37 @@
                 'or_no', 'or_date', 'permit_no', 'barangay_clearance_number', 'business_plate_number', 'mode_of_payment'
             ];
 
-            const dateFields = ['application_date', 'issued_date', 'valid_until', 'or_date'];
+            const dateFields = new Set(['application_date', 'issued_date', 'valid_until', 'or_date']);
 
-            const aoa = [headers];
+            function csvCell(value) {
+                const s = String(value == null ? '' : value);
+                if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+                    return '"' + s.replace(/"/g, '""') + '"';
+                }
+                return s;
+            }
+
+            const rows = [headers.join(',')];
             records.forEach(record => {
                 const row = headers.map(header => {
                     let value = record[header] || '';
-                    if (value && dateFields.includes(header)) {
-                        value = formatDateForCSV(value);
+                    if (value && dateFields.has(header)) {
+                        return csvCell(formatDateForCSV(value));
                     }
-                    return value;
+                    return csvCell(value);
                 });
-                aoa.push(row);
+                rows.push(row.join(','));
             });
 
-            const ws = XLSX.utils.aoa_to_sheet(aoa);
-
-            // Force date columns as text to prevent Excel from reformatting
-            dateFields.forEach(field => {
-                const colIndex = headers.indexOf(field);
-                if (colIndex === -1) return;
-                for (let r = 1; r <= records.length; r++) {
-                    const cellAddress = XLSX.utils.encode_cell({ r, c: colIndex });
-                    if (ws[cellAddress]) {
-                        ws[cellAddress].t = 's';
-                        ws[cellAddress].z = '@';
-                    }
-                }
-            });
-
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Permit Application');
-
+            const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `Application_${timestamp}.xlsx`;
-            XLSX.writeFile(wb, filename);
+            a.download = `Application_${timestamp}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
         }
     </script>
 </body>
