@@ -358,7 +358,11 @@
                 <a href="business-activity.html" class="nav-link"><span class="step-badge">2</span> Activity</a>
                 <a href="permit-application.html" class="nav-link"><span class="step-badge">3</span> Application</a>
                 <a href="business-fees.html" class="nav-link"><span class="step-badge">4</span> Fees</a>
-                <a href="csv-validator.html" class="nav-link active"><span class="step-badge">✓</span> CSV Validator</a>
+                <div class="header-divider"></div>
+                <a href="csv-validator.html" class="nav-link active"><span class="step-badge">✓</span> Business</a>
+                <a href="csv-validator-activity.html" class="nav-link"><span class="step-badge">✓</span> Activity</a>
+                <a href="csv-validator-permit.html" class="nav-link"><span class="step-badge">✓</span> Permit</a>
+                <a href="csv-validator-fees.html" class="nav-link"><span class="step-badge">✓</span> Fees</a>
             </div>
         </div>
 
@@ -487,7 +491,7 @@
         dti_registration_expiry_date: 'MM/DD/YYYY',
         sec_no: 'CS2024-12345 or PN2024-12345',
         cda_no: '9520-16012345',
-        tin_no: '999-999-999-99999',
+        tin_no: '000-000-000-00000',
         email_address: 'email@example.com',
         cellphone_no: '639XXXXXXXXX',
         telephone_no: 'Optional',
@@ -521,7 +525,7 @@
         bin: { pattern: /^\d{7}-\d{4}-\d{7}$/, message: 'Invalid format. Use: 0000000-0000-0000000' },
         email_address: { pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: 'Invalid email format' },
         cellphone_no: { pattern: /^639\d{9}$/, message: 'Must start with 639 and have 12 digits' },
-        tin_no: { pattern: /^\d{3}-\d{3}-\d{3}-\d{5}$/, message: 'Invalid format. Use: 999-999-999-99999' },
+        tin_no: { pattern: /^\d{3}-\d{3}-\d{3}-\d{5}$/, message: 'Invalid format. Use: 000-000-000-00000' },
         dti_no: { pattern: /^\d{4}-\d{7}$/, message: 'Invalid format. Use: YYYY-####### (e.g., 2024-1234567)' },
         sec_no: { pattern: /^(CS|PN)\d{4}-\d{5}$/, message: 'Invalid format. Use: CS####-##### or PN####-##### (e.g., CS2024-12345)' },
         cda_no: { pattern: /^\d{4}-\d{8}$/, message: 'Invalid format. Use: ####-######## (e.g., 9520-16012345)' },
@@ -1282,9 +1286,9 @@
     function loadSampleData() {
         // Sample data with intentional errors to test auto-fix
         const sampleCSV = `bin,business_name,trade_name,business_type,dti_no,dti_registration_expiry_date,sec_no,cda_no,tin_no,email_address,cellphone_no,telephone_no,incharge_first_name,incharge_middle_name,incharge_last_name,incharge_extension_name,incharge_sex,incharge_country_of_citizenship,incharge_street,incharge_barangay,incharge_municipality,incharge_province,office_street,office_barangay_code,location_owned,tdn_no,pin_no,lessor_name,monthly_rental,area,floor_area,no_of_male_employees,no_of_female_employees,no_of_employees_residing_within_the_area,no_of_van,no_of_truck,no_of_motorcycle,activity_type,app_type
-1001301-2024-0000001,Juan's General Merchandise,,SOLE PROPRIETORSHIP,20241234567,12/31/2029,CS2024-99999,,123-456-789-12345,juan@example.com,639123456789,028-123-4567,Juan,,Dela Cruz,JR,M,PHL,123 Rizal St,Brgy. Poblacion,Makati City,Metro Manila,456 Ayala Ave,1376040001,1,12-345-67890,,Maria Santos,15000,45,50,3,2,2,1,2,1,Main Office,N
-1001301-2024-0000002,Sample Store,Trade Name,corporation,2024-9999999,,,,bad-email,091234567890,,Maria,,Santos,,female,Philippines,,Brgy. San Antonio,Quezon City,Metro Manila,,1376040002,0,12-345-67890,,Pedro Reyes,20000,45,60,5,3,2,1,0,1,Branch Office,renewal
-1001301-2024-0000003,Test Business,,,partnership,,,952016012345,,test@test.com,123456789012,,Pedro,,,,M,PHL,,Brgy. Test,Test City,Test Province,,1376040003,1,,,,,,,,,,,,Warehouse,q`;
+1400101-2024-0000001,Juan's General Merchandise,,SOLE PROPRIETORSHIP,20241234567,12/31/2029,CS2024-99999,,123-456-789-12345,juan@example.com,639123456789,028-123-4567,Juan,,Dela Cruz,JR,M,Philippines,123 Rizal St,Agtangao,Bangued,Abra,123 Elm Street,1400101001,1,12-345-67890,,Maria Santos,15000,100,100,3,2,2,1,2,1,Main Office,N
+1400101-2024-0000002,Sample Store,Trade Name,corporation,2024-9999999,,,,bad-email,091234567890,,Maria,,Santos,,female,Philippines,,Brgy. San Antonio,Quezon City,Metro Manila,,1400101002,0,12-345-67890,,Pedro Reyes,20000,45,60,5,3,2,1,0,1,Branch Office,renewal
+1400101-2024-0000003,Test Business,,,partnership,,,952016012345,,test@test.com,123456789012,,Pedro,,,,M,Philippines,,Brgy. Test,Test City,Test Province,,1400101003,1,,,,,,,,,,,,Warehouse,q`;
 
         parseCSV(sampleCSV);
     }

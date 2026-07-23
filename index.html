@@ -480,11 +480,15 @@
             </div>
 
             <div class="header-links">
-                <a href="https://edtr10.github.io/migration/" class="nav-link active"><span class="step-badge">1</span> Business</a>
-                <a href="business-activity.html" class="nav-link"><span class="step-badge">2</span> Business Activity</a>
+                <a href="index.html" class="nav-link active"><span class="step-badge">1</span> Business</a>
+                <a href="business-activity.html" class="nav-link"><span class="step-badge">2</span> Activity</a>
                 <a href="permit-application.html" class="nav-link"><span class="step-badge">3</span> Application</a>
                 <a href="business-fees.html" class="nav-link"><span class="step-badge">4</span> Fees</a>
-                <a href="csv-validator.html" class="nav-link"><span class="step-badge">✓</span> CSV Validator</a>
+                <div class="header-divider"></div>
+                <a href="csv-validator.html" class="nav-link"><span class="step-badge">✓</span> Business</a>
+                <a href="csv-validator-activity.html" class="nav-link"><span class="step-badge">✓</span> Activity</a>
+                <a href="csv-validator-permit.html" class="nav-link"><span class="step-badge">✓</span> Permit</a>
+                <a href="csv-validator-fees.html" class="nav-link"><span class="step-badge">✓</span> Fees</a>
 
                 <div class="header-divider"></div>
 
@@ -593,8 +597,8 @@
 
                     <div class="form-group">
                         <label>TIN</label>
-                        <input type="text" id="tin_no" placeholder="999-999-999-99999" maxlength="17">
-                        <div class="field-hint">Format: 999-999-999-99999 &nbsp;·&nbsp; e.g., 123-456-789-12345</div>
+                        <input type="text" id="tin_no" placeholder="000-000-000-00000" maxlength="17">
+                        <div class="field-hint">Format: 000-000-000-00000 &nbsp;·&nbsp; e.g., 123-456-789-12345</div>
                         <div class="error-message" id="tin_no-error"></div>
                     </div>
                 </div>
@@ -669,8 +673,8 @@
 
                     <div class="form-group">
                         <label>Country of Citizenship <span class="required">*</span></label>
-                        <input type="text" id="incharge_country_of_citizenship" value="PHL" maxlength="100">
-                        <div class="field-hint">e.g., PHL (Philippines) &nbsp;·&nbsp; USA &nbsp;·&nbsp; CHN</div>
+                        <input type="text" id="incharge_country_of_citizenship" value="Philippines" maxlength="100">
+                        <div class="field-hint">e.g., Philippines &nbsp;·&nbsp; USA &nbsp;·&nbsp; China</div>
                         <div class="error-message" id="incharge_country_of_citizenship-error"></div>
                     </div>
                 </div>
@@ -764,11 +768,20 @@
                 <!-- BUSINESS DETAILS -->
                 <div class="section-title">📊 Business Details</div>
 
-                <div class="form-group">
-                    <label>Total Floor Area (sqm) <span class="required">*</span></label>
-                    <input type="number" id="area" min="0">
-                    <div class="field-hint">Total area in square meters &nbsp;·&nbsp; e.g., 50</div>
-                    <div class="error-message" id="area-error"></div>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Total Floor Area (sqm) <span class="required">*</span></label>
+                        <input type="number" id="floor_area" min="0">
+                        <div class="field-hint">Total floor area of the business &nbsp;·&nbsp; e.g., 100</div>
+                        <div class="error-message" id="floor_area-error"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Used Area (sqm) <span class="required">*</span></label>
+                        <input type="number" id="area" min="0">
+                        <div class="field-hint">Must not exceed total floor area &nbsp;·&nbsp; e.g., 50</div>
+                        <div class="error-message" id="area-error"></div>
+                    </div>
                 </div>
 
                 <div class="row">
@@ -1461,11 +1474,24 @@
                 }
             }
 
-            // Area
-            if (!document.getElementById('area').value) {
-                showError('area', 'Total floor area is required');
+            // Floor Area
+            const floorArea = document.getElementById('floor_area').value;
+            if (!floorArea) {
+                showError('floor_area', 'Total floor area is required');
                 isValid = false;
                 errors.push('❌ Total Floor Area: Required');
+            }
+
+            // Area (must not exceed floor area)
+            const area = document.getElementById('area').value;
+            if (!area) {
+                showError('area', 'Used area is required');
+                isValid = false;
+                errors.push('❌ Used Area: Required');
+            } else if (floorArea && parseFloat(area) > parseFloat(floorArea)) {
+                showError('area', 'Used area cannot exceed total floor area');
+                isValid = false;
+                errors.push('❌ Used Area: Cannot exceed total floor area');
             }
 
             // Employees
@@ -1540,6 +1566,7 @@
                 pin_no: document.getElementById('pin_no').value,
                 lessor_name: document.getElementById('lessor_name').value,
                 monthly_rental: document.getElementById('monthly_rental').value,
+                floor_area: document.getElementById('floor_area').value,
                 area: document.getElementById('area').value,
                 no_of_male_employees: document.getElementById('no_of_male_employees').value,
                 no_of_female_employees: document.getElementById('no_of_female_employees').value,
@@ -1613,7 +1640,7 @@
             });
 
             // Reset default values
-            document.getElementById('incharge_country_of_citizenship').value = 'PHL';
+            document.getElementById('incharge_country_of_citizenship').value = 'Philippines';
             document.getElementById('no_of_male_employees').value = '0';
             document.getElementById('no_of_female_employees').value = '0';
             document.getElementById('no_of_employees_residing_within_the_area').value = '0';
@@ -1659,7 +1686,7 @@
             }
 
             // 4) ensure conditional registration fields (which change handlers sometimes clear) are set explicitly AFTER handlers
-            ['dti_no','dti_registration_expiry_date','sec_no','cda_no','tdn_no','pin_no','lessor_name','monthly_rental'].forEach(id => {
+            ['dti_no','dti_registration_expiry_date','sec_no','cda_no','tdn_no','pin_no','lessor_name','monthly_rental','floor_area','area'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el && r[id] !== undefined && r[id] !== null){ el.value = r[id]; }
             });
@@ -1715,7 +1742,7 @@
                 'incharge_middle_name', 'incharge_last_name', 'incharge_extension_name', 'incharge_sex',
                 'incharge_country_of_citizenship', 'incharge_street', 'incharge_barangay',
                 'incharge_municipality', 'incharge_province', 'office_street', 'office_barangay_code',
-                'location_owned', 'tdn_no', 'pin_no', 'lessor_name', 'monthly_rental', 'area',
+                'location_owned', 'tdn_no', 'pin_no', 'lessor_name', 'monthly_rental', 'floor_area', 'area',
                 'no_of_male_employees', 'no_of_female_employees', 'no_of_employees_residing_within_the_area',
                 'no_of_van', 'no_of_truck', 'no_of_motorcycle', 'activity_type'
             ];
