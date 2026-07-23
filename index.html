@@ -338,6 +338,12 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(5,150,105,0.35);
         }
+        .btn-info { background: #0891b2; color: #fff; }
+        .btn-info:hover {
+            background: #0e7490;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(8,145,178,0.35);
+        }
 
         .btn-danger {
             padding: 5px 11px;
@@ -845,6 +851,8 @@
                 <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Record</button>
                 <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
                 <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
+                <button type="button" class="btn-info" onclick="document.getElementById('csvUploadInput').click()">📥 Import CSV</button>
+                <input type="file" id="csvUploadInput" accept=".csv" style="display:none" onchange="importCSV(event)">
             </div>
         </form>
 
@@ -1780,6 +1788,154 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.endsWith('.csv')) {
+                alert('⚠️ Please select a CSV file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let text = e.target.result;
+                    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+                    const lines = text.split(/\r?\n/).filter(line => line.trim());
+                    if (lines.length < 2) {
+                        alert('⚠️ CSV file must have at least a header row and one data row');
+                        return;
+                    }
+
+                    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+                    
+                    if (!headers.includes('bin') || !headers.includes('business_name')) {
+                        alert('⚠️ CSV must have at least "bin" and "business_name" columns');
+                        return;
+                    }
+
+                    let importedCount = 0;
+                    let skippedCount = 0;
+                    let errors = [];
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        const row = {};
+                        headers.forEach((header, idx) => {
+                            row[header] = (values[idx] || '').trim();
+                        });
+
+                        if (!row.bin || !row.business_name) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: Missing BIN or business_name`);
+                            continue;
+                        }
+
+                        if (records.some(r => r.bin === row.bin)) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: BIN ${row.bin} already exists`);
+                            continue;
+                        }
+
+                        records.push({
+                            bin: row.bin,
+                            business_name: row.business_name,
+                            trade_name: row.trade_name || '',
+                            business_type: row.business_type || '',
+                            dti_no: row.dti_no || '',
+                            dti_registration_expiry_date: row.dti_registration_expiry_date || '',
+                            sec_no: row.sec_no || '',
+                            cda_no: row.cda_no || '',
+                            tin_no: row.tin_no || '',
+                            email_address: row.email_address || '',
+                            cellphone_no: row.cellphone_no || '',
+                            telephone_no: row.telephone_no || '',
+                            incharge_first_name: row.incharge_first_name || '',
+                            incharge_middle_name: row.incharge_middle_name || '',
+                            incharge_last_name: row.incharge_last_name || '',
+                            incharge_extension_name: row.incharge_extension_name || '',
+                            incharge_sex: row.incharge_sex || '',
+                            incharge_country_of_citizenship: row.incharge_country_of_citizenship || '',
+                            incharge_street: row.incharge_street || '',
+                            incharge_barangay: row.incharge_barangay || '',
+                            incharge_municipality: row.incharge_municipality || '',
+                            incharge_province: row.incharge_province || '',
+                            office_street: row.office_street || '',
+                            office_barangay_code: row.office_barangay_code || '',
+                            location_owned: row.location_owned || '',
+                            tdn_no: row.tdn_no || '',
+                            pin_no: row.pin_no || '',
+                            lessor_name: row.lessor_name || '',
+                            monthly_rental: row.monthly_rental || '',
+                            floor_area: row.floor_area || '',
+                            area: row.area || '',
+                            no_of_male_employees: row.no_of_male_employees || '0',
+                            no_of_female_employees: row.no_of_female_employees || '0',
+                            no_of_employees_residing_within_the_area: row.no_of_employees_residing_within_the_area || '0',
+                            no_of_van: row.no_of_van || '0',
+                            no_of_truck: row.no_of_truck || '0',
+                            no_of_motorcycle: row.no_of_motorcycle || '0',
+                            activity_type: row.activity_type || '',
+                            app_type: row.app_type || ''
+                        });
+                        importedCount++;
+                    }
+
+                    saveRecords();
+                    renderTable();
+                    updateRecordCount();
+
+                    let message = `✅ Import completed!\n\nImported: ${importedCount} records\nSkipped: ${skippedCount} records`;
+                    if (errors.length > 0 && errors.length <= 10) {
+                        message += '\n\nErrors:\n' + errors.join('\n');
+                    } else if (errors.length > 10) {
+                        message += '\n\nFirst 10 errors:\n' + errors.slice(0, 10).join('\n') + `\n... and ${errors.length - 10} more`;
+                    }
+                    alert(message);
+
+                } catch (err) {
+                    alert('⚠️ Error reading CSV file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (i + 1 < line.length && line[i + 1] === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            result.push(current.trim());
+            return result;
         }
 
     </script>

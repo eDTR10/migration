@@ -520,6 +520,44 @@
         no_of_motorcycle: '0'
     };
 
+    // Maxlength for text fields
+    const fieldMaxlengths = {
+        bin: 22,
+        business_name: 100,
+        trade_name: 100,
+        dti_no: 30,
+        dti_registration_expiry_date: 10,
+        sec_no: 30,
+        cda_no: 30,
+        tin_no: 17,
+        email_address: 100,
+        cellphone_no: 12,
+        telephone_no: 20,
+        incharge_first_name: 100,
+        incharge_middle_name: 100,
+        incharge_last_name: 100,
+        incharge_extension_name: 100,
+        incharge_country_of_citizenship: 100,
+        incharge_street: 100,
+        incharge_barangay: 100,
+        incharge_municipality: 100,
+        incharge_province: 100,
+        office_street: 100,
+        office_barangay_code: 10,
+        tdn_no: 20,
+        pin_no: 20,
+        lessor_name: 150,
+        monthly_rental: 15,
+        area: 15,
+        floor_area: 15,
+        no_of_male_employees: 10,
+        no_of_female_employees: 10,
+        no_of_employees_residing_within_the_area: 10,
+        no_of_van: 10,
+        no_of_truck: 10,
+        no_of_motorcycle: 10
+    };
+
     // Validation rules
     const validationRules = {
         bin: { pattern: /^\d{7}-\d{4}-\d{7}$/, message: 'Invalid format. Use: 0000000-0000-0000000' },
@@ -945,7 +983,9 @@
                     });
                     bodyHTML += `</select>`;
                 } else {
-                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" title="${escapeHtml(warning || error || value)}" placeholder="${placeholder}" `;
+                    const maxlength = fieldMaxlengths[header] || '';
+                    const maxlengthAttr = maxlength ? `maxlength="${maxlength}"` : '';
+                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" title="${escapeHtml(warning || error || value)}" placeholder="${placeholder}" ${maxlengthAttr} `;
                     bodyHTML += `onchange="updateCell('${row._rowIndex}', '${header}', this.value)" `;
                     bodyHTML += `onfocus="this.select()">`;
                 }

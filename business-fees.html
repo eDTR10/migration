@@ -110,6 +110,8 @@
         .btn-secondary:hover { background: #e2e8f0; color: #1e293b; }
         .btn-success { background: #059669; color: #fff; }
         .btn-success:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,0.35); }
+        .btn-info { background: #0891b2; color: #fff; }
+        .btn-info:hover { background: #0e7490; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(8,145,178,0.35); }
         .records-panel {
             background: #fff; border-left: 1px solid #e2e8f0;
             overflow: hidden; display: flex; flex-direction: column; height: 100%;
@@ -333,6 +335,8 @@
                 <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Fee</button>
                 <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
                 <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
+                <button type="button" class="btn-info" onclick="document.getElementById('csvUploadInput').click()">📥 Import CSV</button>
+                <input type="file" id="csvUploadInput" accept=".csv" style="display:none" onchange="importCSV(event)">
             </div>
         </form>
 
@@ -1105,6 +1109,128 @@
             URL.revokeObjectURL(link.href);
 
             alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.endsWith('.csv')) {
+                alert('⚠️ Please select a CSV file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let text = e.target.result;
+                    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+                    const lines = text.split(/\r?\n/).filter(line => line.trim());
+                    if (lines.length < 2) {
+                        alert('⚠️ CSV file must have at least a header row and one data row');
+                        return;
+                    }
+
+                    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+                    
+                    if (!headers.includes('business_bin') || !headers.includes('code')) {
+                        alert('⚠️ CSV must have at least "business_bin" and "code" columns');
+                        return;
+                    }
+
+                    let importedCount = 0;
+                    let skippedCount = 0;
+                    let errors = [];
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        const row = {};
+                        headers.forEach((header, idx) => {
+                            row[header] = (values[idx] || '').trim();
+                        });
+
+                        if (!row.business_bin || !row.code) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: Missing business_bin or code`);
+                            continue;
+                        }
+
+                        if (records.some(r => r.business_bin === row.business_bin && r.code === row.code)) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: BIN ${row.business_bin} with code ${row.code} already exists`);
+                            continue;
+                        }
+
+                        records.push({
+                            business_bin: row.business_bin,
+                            application_or_no: row.application_or_no || '',
+                            code: row.code,
+                            type: row.type || '',
+                            description: row.description || '',
+                            amount: row.amount || '0',
+                            discount: row.discount || '0',
+                            interest: row.interest || '0',
+                            surcharge: row.surcharge || '0',
+                            total: row.total || '0',
+                            qtr_from: row.qtr_from || '',
+                            qtr_to: row.qtr_to || '',
+                            year: row.year || ''
+                        });
+                        importedCount++;
+                    }
+
+                    saveRecords();
+                    renderTable();
+                    updateRecordCount();
+
+                    let message = `✅ Import completed!\n\nImported: ${importedCount} records\nSkipped: ${skippedCount} records`;
+                    if (errors.length > 0 && errors.length <= 10) {
+                        message += '\n\nErrors:\n' + errors.join('\n');
+                    } else if (errors.length > 10) {
+                        message += '\n\nFirst 10 errors:\n' + errors.slice(0, 10).join('\n') + `\n... and ${errors.length - 10} more`;
+                    }
+                    alert(message);
+
+                } catch (err) {
+                    alert('⚠️ Error reading CSV file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (i + 1 < line.length && line[i + 1] === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            result.push(current.trim());
+            return result;
         }
     </script>
 </body>

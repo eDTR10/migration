@@ -167,9 +167,19 @@
         retired_date: 'MM/DD/YYYY'
     };
 
+    const fieldMaxlengths = {
+        bin: 22,
+        business_line_code: '',
+        capital_amount: 15,
+        gross_amount_essential: 15,
+        gross_amount_nonessential: 15,
+        gross_amount: 15,
+        retired_date: 10
+    };
+
     const validationRules = {
         bin: { pattern: /^\d{7}-\d{4}-\d{7}$/, message: 'Invalid format. Use: 0000000-0000-0000000' },
-        business_line_code: { pattern: /^\d{3,5}$/, message: 'PSIC code must be 3-5 digits' },
+        business_line_code: { pattern: /^.+$/, message: 'Business line code is required' },
         capital_amount: { pattern: /^\d+(\.\d+)?$/, message: 'Numbers only' },
         gross_amount_essential: { pattern: /^\d+(\.\d+)?$/, message: 'Numbers only' },
         gross_amount_nonessential: { pattern: /^\d+(\.\d+)?$/, message: 'Numbers only' },
@@ -309,7 +319,9 @@
                     dropdownOptions[header].forEach(opt => { const selected = (value || '').toUpperCase().trim() === (opt.value || '').toUpperCase().trim() ? 'selected' : ''; bodyHTML += `<option value="${opt.value}" ${selected}>${opt.label}</option>`; });
                     bodyHTML += `</select>`;
                 } else {
-                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" placeholder="${placeholder}" onchange="updateCell('${row._rowIndex}','${header}',this.value)" onfocus="this.select()">`;
+                    const maxlength = fieldMaxlengths[header] || '';
+                    const maxlengthAttr = maxlength ? `maxlength="${maxlength}"` : '';
+                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" placeholder="${placeholder}" ${maxlengthAttr} onchange="updateCell('${row._rowIndex}','${header}',this.value)" onfocus="this.select()">`;
                 }
                 bodyHTML += `</td>`;
             });

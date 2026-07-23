@@ -177,6 +177,19 @@
         year: '2024'
     };
 
+    const fieldMaxlengths = {
+        business_bin: 22,
+        application_or_no: 50,
+        code: 20,
+        description: 100,
+        amount: 15,
+        discount: 15,
+        interest: 15,
+        surcharge: 15,
+        total: 15,
+        year: 4
+    };
+
     const validationRules = {
         business_bin: { pattern: /^\d{7}-\d{4}-\d{7}$/, message: 'Invalid format. Use: 0000000-0000-0000000' },
         amount: { pattern: /^\d+(\.\d+)?$/, message: 'Numbers only' },
@@ -314,7 +327,9 @@
                     dropdownOptions[header].forEach(opt => { const selected = (value || '').toUpperCase().trim() === (opt.value || '').toUpperCase().trim() ? 'selected' : ''; bodyHTML += `<option value="${opt.value}" ${selected}>${opt.label}</option>`; });
                     bodyHTML += `</select>`;
                 } else {
-                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" placeholder="${placeholder}" onchange="updateCell('${row._rowIndex}','${header}',this.value)" onfocus="this.select()">`;
+                    const maxlength = fieldMaxlengths[header] || '';
+                    const maxlengthAttr = maxlength ? `maxlength="${maxlength}"` : '';
+                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" placeholder="${placeholder}" ${maxlengthAttr} onchange="updateCell('${row._rowIndex}','${header}',this.value)" onfocus="this.select()">`;
                 }
                 bodyHTML += `</td>`;
             });

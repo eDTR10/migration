@@ -111,6 +111,8 @@
         .btn-secondary:hover { background: #e2e8f0; color: #1e293b; }
         .btn-success { background: #059669; color: #fff; }
         .btn-success:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,0.35); }
+        .btn-info { background: #0891b2; color: #fff; }
+        .btn-info:hover { background: #0e7490; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(8,145,178,0.35); }
         .records-panel {
             background: #fff; border-left: 1px solid #e2e8f0;
             overflow: hidden; display: flex; flex-direction: column; height: 100%;
@@ -250,6 +252,8 @@
                 <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Activity</button>
                 <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
                 <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
+                <button type="button" class="btn-info" onclick="document.getElementById('csvUploadInput').click()">📥 Import CSV</button>
+                <input type="file" id="csvUploadInput" accept=".csv" style="display:none" onchange="importCSV(event)">
             </div>
         </form>
 
@@ -368,6 +372,11 @@
             if (fieldId === 'business_line_code') {
                 if (!value || value.trim() === '') {
                     showError(fieldId, 'Business line code is required');
+                    return false;
+                }
+                // PSIC code must be 3-5 digits
+                if (!/^\d{3,5}$/.test(value.trim())) {
+                    showError(fieldId, 'PSIC code must be 3-5 digits (e.g., 47219)');
                     return false;
                 }
                 clearError(fieldId);
@@ -667,6 +676,135 @@
             URL.revokeObjectURL(link.href);
 
             alert(`✅ CSV file generated successfully!\n\nFilename: ${filename}\nRecords: ${records.length}`);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.endsWith('.csv')) {
+                alert('⚠️ Please select a CSV file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let text = e.target.result;
+                    // Remove BOM if present
+                    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+                    const lines = text.split(/\r?\n/).filter(line => line.trim());
+                    if (lines.length < 2) {
+                        alert('⚠️ CSV file must have at least a header row and one data row');
+                        return;
+                    }
+
+                    // Parse headers
+                    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+                    
+                    // Check required headers
+                    if (!headers.includes('bin') || !headers.includes('business_line_code')) {
+                        alert('⚠️ CSV must have at least "bin" and "business_line_code" columns');
+                        return;
+                    }
+
+                    let importedCount = 0;
+                    let skippedCount = 0;
+                    let errors = [];
+
+                    // Parse data rows
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        const row = {};
+                        headers.forEach((header, idx) => {
+                            row[header] = (values[idx] || '').trim();
+                        });
+
+                        // Validate required fields
+                        if (!row.bin || !row.business_line_code) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: Missing BIN or business_line_code`);
+                            continue;
+                        }
+
+                        // Check for duplicate BIN + business_line_code combination
+                        const isDuplicate = records.some(r => 
+                            r.bin === row.bin && r.business_line_code === row.business_line_code
+                        );
+                        if (isDuplicate) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: BIN ${row.bin} with line code ${row.business_line_code} already exists`);
+                            continue;
+                        }
+
+                        // Add record
+                        records.push({
+                            bin: row.bin,
+                            business_line_code: row.business_line_code,
+                            capital_amount: row.capital_amount || '0',
+                            gross_amount_essential: row.gross_amount_essential || '0',
+                            gross_amount_nonessential: row.gross_amount_nonessential || '0',
+                            gross_amount: row.gross_amount || '0',
+                            retired_date: row.retired_date || ''
+                        });
+                        importedCount++;
+                    }
+
+                    // Save and refresh
+                    saveRecords();
+                    renderTable();
+                    updateRecordCount();
+
+                    // Show result
+                    let message = `✅ Import completed!\n\nImported: ${importedCount} records\nSkipped: ${skippedCount} records`;
+                    if (errors.length > 0 && errors.length <= 10) {
+                        message += '\n\nErrors:\n' + errors.join('\n');
+                    } else if (errors.length > 10) {
+                        message += '\n\nFirst 10 errors:\n' + errors.slice(0, 10).join('\n') + `\n... and ${errors.length - 10} more`;
+                    }
+                    alert(message);
+
+                } catch (err) {
+                    alert('⚠️ Error reading CSV file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (i + 1 < line.length && line[i + 1] === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            result.push(current.trim());
+            return result;
         }
     </script>
 </body>

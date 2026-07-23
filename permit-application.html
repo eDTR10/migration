@@ -110,6 +110,8 @@
         .btn-secondary:hover { background: #e2e8f0; color: #1e293b; }
         .btn-success { background: #059669; color: #fff; }
         .btn-success:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(5,150,105,0.35); }
+        .btn-info { background: #0891b2; color: #fff; }
+        .btn-info:hover { background: #0e7490; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(8,145,178,0.35); }
         .records-panel {
             background: #fff; border-left: 1px solid #e2e8f0;
             overflow: hidden; display: flex; flex-direction: column; height: 100%;
@@ -381,6 +383,8 @@
                 <button type="button" class="btn-primary" onclick="addRecord()">➕ Add Record</button>
                 <button type="button" class="btn-secondary" onclick="clearForm()">🔄 Clear Form</button>
                 <button type="button" class="btn-success" onclick="generateCSV()">💾 Generate CSV</button>
+                <button type="button" class="btn-info" onclick="document.getElementById('csvUploadInput').click()">📥 Import CSV</button>
+                <input type="file" id="csvUploadInput" accept=".csv" style="display:none" onchange="importCSV(event)">
             </div>
         </form>
 
@@ -528,21 +532,49 @@
             }
         });
 
+        // Validate year against BIN year for renewal
+        document.getElementById('year').addEventListener('input', function() {
+            const appType = document.getElementById('application_type').value;
+            if (appType === 'R') {
+                const bin = document.getElementById('business_bin').value;
+                if (bin) {
+                    validateRenewalBinYear(bin, appType);
+                }
+            }
+        });
+
         function validateRenewalBinYear(bin, appType) {
             if (appType !== 'R') {
                 clearError('application_type');
+                clearError('year');
                 return true;
             }
             const parts = bin.split('-');
             if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
                 const binYear = parseInt(parts[1]);
-                const currentYear = new Date().getFullYear();
-                if (binYear !== currentYear - 1) {
-                    showError('application_type', 'Renewal requires BIN year to be ' + (currentYear - 1) + ', got ' + binYear);
-                    return false;
+                const yearInput = document.getElementById('year');
+                const yearValue = parseInt(yearInput.value);
+                
+                // Check if year is provided and must be greater than BIN year
+                if (yearInput.value && !isNaN(yearValue)) {
+                    if (yearValue <= binYear) {
+                        showError('year', 'For Renewal, year must be greater than BIN year (' + binYear + ')');
+                        return false;
+                    } else {
+                        clearError('year');
+                        return true;
+                    }
+                } else {
+                    // Year not yet entered, just validate BIN year is valid for renewal
+                    const currentYear = new Date().getFullYear();
+                    if (binYear >= currentYear) {
+                        showError('application_type', 'Renewal requires BIN year to be before current year');
+                        return false;
+                    }
                 }
             }
             clearError('application_type');
+            clearError('year');
             return true;
         }
 
@@ -588,6 +620,19 @@
                 if (!value || value < 2000 || value > 2099) {
                     showError(fieldId, 'Year must be between 2000-2099');
                     return false;
+                }
+                // For renewal, year must be greater than BIN year
+                const appType = document.getElementById('application_type').value;
+                if (appType === 'R') {
+                    const bin = document.getElementById('business_bin').value;
+                    const parts = bin.split('-');
+                    if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
+                        const binYear = parseInt(parts[1]);
+                        if (parseInt(value) <= binYear) {
+                            showError(fieldId, 'For Renewal, year must be greater than BIN year (' + binYear + ')');
+                            return false;
+                        }
+                    }
                 }
                 clearError(fieldId);
                 return true;
@@ -790,6 +835,17 @@
             if (!validateField('year', year)) {
                 isValid = false;
                 errors.push('❌ Year is required (2000-2099)');
+            } else if (appType === 'R' && bin && year) {
+                // For renewal, year must be greater than BIN year
+                const parts = bin.split('-');
+                if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
+                    const binYear = parseInt(parts[1]);
+                    if (parseInt(year) <= binYear) {
+                        showError('year', 'For Renewal, year must be greater than BIN year (' + binYear + ')');
+                        isValid = false;
+                        errors.push('❌ For Renewal, year must be greater than BIN year (' + binYear + ')');
+                    }
+                }
             }
 
             const qtrTo = document.getElementById('qtr_to').value;
@@ -1042,6 +1098,134 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(a.href);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.name.endsWith('.csv')) {
+                alert('⚠️ Please select a CSV file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let text = e.target.result;
+                    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+
+                    const lines = text.split(/\r?\n/).filter(line => line.trim());
+                    if (lines.length < 2) {
+                        alert('⚠️ CSV file must have at least a header row and one data row');
+                        return;
+                    }
+
+                    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+                    
+                    if (!headers.includes('business_bin') || !headers.includes('or_no')) {
+                        alert('⚠️ CSV must have at least "business_bin" and "or_no" columns');
+                        return;
+                    }
+
+                    let importedCount = 0;
+                    let skippedCount = 0;
+                    let errors = [];
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        const row = {};
+                        headers.forEach((header, idx) => {
+                            row[header] = (values[idx] || '').trim();
+                        });
+
+                        if (!row.business_bin || !row.or_no) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: Missing business_bin or or_no`);
+                            continue;
+                        }
+
+                        if (records.some(r => r.business_bin === row.business_bin && r.or_no === row.or_no)) {
+                            skippedCount++;
+                            errors.push(`Row ${i + 1}: BIN ${row.business_bin} with OR# ${row.or_no} already exists`);
+                            continue;
+                        }
+
+                        records.push({
+                            business_bin: row.business_bin,
+                            application_type: row.application_type || '',
+                            application_date: row.application_date || '',
+                            year: row.year || '',
+                            mode_of_payment: row.mode_of_payment || '',
+                            qtr_from: row.qtr_from || '',
+                            qtr_to: row.qtr_to || '',
+                            amount: row.amount || '0',
+                            discount: row.discount || '0',
+                            surcharge: row.surcharge || '0',
+                            interest: row.interest || '0',
+                            total: row.total || '0',
+                            issued_date: row.issued_date || '',
+                            valid_until: row.valid_until || '',
+                            or_no: row.or_no,
+                            or_date: row.or_date || '',
+                            permit_no: row.permit_no || '',
+                            business_plate_number: row.business_plate_number || '',
+                            barangay_clearance_number: row.barangay_clearance_number || ''
+                        });
+                        importedCount++;
+                    }
+
+                    saveRecords();
+                    renderTable();
+                    updateRecordCount();
+
+                    let message = `✅ Import completed!\n\nImported: ${importedCount} records\nSkipped: ${skippedCount} records`;
+                    if (errors.length > 0 && errors.length <= 10) {
+                        message += '\n\nErrors:\n' + errors.join('\n');
+                    } else if (errors.length > 10) {
+                        message += '\n\nFirst 10 errors:\n' + errors.slice(0, 10).join('\n') + `\n... and ${errors.length - 10} more`;
+                    }
+                    alert(message);
+
+                } catch (err) {
+                    alert('⚠️ Error reading CSV file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (i + 1 < line.length && line[i + 1] === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        result.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            result.push(current.trim());
+            return result;
         }
     </script>
 </body>

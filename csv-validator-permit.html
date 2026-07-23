@@ -188,6 +188,24 @@
         barangay_clearance_number: 'ABC-123'
     };
 
+    const fieldMaxlengths = {
+        business_bin: 22,
+        application_date: 10,
+        year: 4,
+        amount: 15,
+        discount: 15,
+        surcharge: 15,
+        interest: 15,
+        total: 15,
+        issued_date: 10,
+        valid_until: 10,
+        or_no: 50,
+        or_date: 10,
+        permit_no: 50,
+        business_plate_number: 50,
+        barangay_clearance_number: 50
+    };
+
     const validationRules = {
         business_bin: { pattern: /^\d{7}-\d{4}-\d{7}$/, message: 'Invalid format. Use: 0000000-0000-0000000' },
         year: { pattern: /^\d{4}$/, message: 'Must be 4-digit year' },
@@ -258,6 +276,19 @@
         if (row.application_type && row.application_type.toUpperCase() === 'Q') {
             if (!row.qtr_from || row.qtr_from.trim() === '') errors['qtr_from'] = 'Quarter From required for Quarterly';
             if (!row.qtr_to || row.qtr_to.trim() === '') errors['qtr_to'] = 'Quarter To required for Quarterly';
+        }
+        // Renewal logic: year must be greater than BIN year
+        if (row.application_type && row.application_type.toUpperCase() === 'R') {
+            if (row.business_bin && row.year) {
+                const parts = row.business_bin.split('-');
+                if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
+                    const binYear = parseInt(parts[1]);
+                    const yearValue = parseInt(row.year);
+                    if (!isNaN(yearValue) && yearValue <= binYear) {
+                        errors['year'] = 'For Renewal, year must be greater than BIN year (' + binYear + ')';
+                    }
+                }
+            }
         }
         // Calculate total
         const amount = parseFloat(row.amount) || 0;
@@ -330,7 +361,9 @@
                     dropdownOptions[header].forEach(opt => { const selected = (value || '').toUpperCase().trim() === (opt.value || '').toUpperCase().trim() ? 'selected' : ''; bodyHTML += `<option value="${opt.value}" ${selected}>${opt.label}</option>`; });
                     bodyHTML += `</select>`;
                 } else {
-                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" placeholder="${placeholder}" onchange="updateCell('${row._rowIndex}','${header}',this.value)" onfocus="this.select()">`;
+                    const maxlength = fieldMaxlengths[header] || '';
+                    const maxlengthAttr = maxlength ? `maxlength="${maxlength}"` : '';
+                    bodyHTML += `<input type="text" class="${inputClass}" value="${escapeHtml(value)}" placeholder="${placeholder}" ${maxlengthAttr} onchange="updateCell('${row._rowIndex}','${header}',this.value)" onfocus="this.select()">`;
                 }
                 bodyHTML += `</td>`;
             });
