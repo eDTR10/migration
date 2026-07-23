@@ -176,6 +176,8 @@
                 <a href="permit-application.html" class="nav-link active"><span class="step-badge">3</span> Application</a>
                 <a href="business-fees.html" class="nav-link"><span class="step-badge">4</span> Fees</a>
                 <div class="header-divider"></div>
+                <a href="csv-validator.html" class="nav-link"><span class="step-badge">✓</span> CSV Validator</a>
+                <div class="header-divider"></div>
                 <button onclick="clearAllRecords()" class="btn-danger">🗑 Clear All</button>
             </div>
         </div>
@@ -499,6 +501,12 @@
                 if (business) {
                     info.innerHTML = `<strong>Business:</strong> ${business.business_name}<br><strong>Type:</strong> ${business.business_type}`;
                     info.style.display = 'block';
+                    // Auto-fill application type from business record
+                    if (business.app_type) {
+                        document.getElementById('application_type').value = business.app_type;
+                    }
+                    // Validate renewal BIN year
+                    validateRenewalBinYear(bin, document.getElementById('application_type').value);
                 } else {
                     info.style.display = 'none';
                 }
@@ -510,7 +518,30 @@
 
         document.getElementById('application_type').addEventListener('change', function() {
             applyBinYearIfNew();
+            // Validate renewal BIN year when app type changes
+            const bin = document.getElementById('business_bin').value;
+            if (bin) {
+                validateRenewalBinYear(bin, this.value);
+            }
         });
+
+        function validateRenewalBinYear(bin, appType) {
+            if (appType !== 'R') {
+                clearError('application_type');
+                return true;
+            }
+            const parts = bin.split('-');
+            if (parts.length >= 2 && /^\d{4}$/.test(parts[1])) {
+                const binYear = parseInt(parts[1]);
+                const currentYear = new Date().getFullYear();
+                if (binYear !== currentYear - 1) {
+                    showError('application_type', 'Renewal requires BIN year to be ' + (currentYear - 1) + ', got ' + binYear);
+                    return false;
+                }
+            }
+            clearError('application_type');
+            return true;
+        }
 
         function calculateTotal() {
             const amount = parseFloat(document.getElementById('amount').value) || 0;
@@ -737,6 +768,13 @@
             if (!validateField('application_type', appType)) {
                 isValid = false;
                 errors.push('❌ Application Type is required (N, R, or Q)');
+            } else if (appType === 'R' && bin) {
+                // Renewal: BIN year must be current year - 1
+                if (!validateRenewalBinYear(bin, appType)) {
+                    const currentYear = new Date().getFullYear();
+                    isValid = false;
+                    errors.push('❌ Renewal requires BIN year to be ' + (currentYear - 1));
+                }
             }
 
             const appDate = document.getElementById('application_date').value;
